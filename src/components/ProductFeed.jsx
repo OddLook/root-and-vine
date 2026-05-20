@@ -3,12 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion'
 import ProductCard from './ProductCard'
 import Hero from './Hero'
 import Footer from './Footer'
+import FilterBar from './FilterBar'
 import { useProducts } from '../hooks/useProducts'
 
 const ease = [0.25, 0.46, 0.45, 0.94]
 
 const INITIAL_COUNT = 8
 const ITEMS_PER_ROW = 4
+
+const EMPTY_FILTERS = {
+  pet_friendly: false,
+  air_purifying: false,
+  outdoor: false,
+  rare: false,
+  sale: false,
+  difficulty: null,
+}
 
 const cardVariants = {
   enter: (dir) => ({ y: dir > 0 ? '100%' : '-100%', opacity: 0 }),
@@ -17,7 +27,9 @@ const cardVariants = {
 }
 
 export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
-  const { products, loading } = useProducts()
+  const [filters, setFilters] = useState(EMPTY_FILTERS)
+  const { products, loading } = useProducts(filters)
+
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -30,6 +42,24 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
+  // Reset pagination and clamp index when filtered results change
+  useEffect(() => {
+    setVisibleCount(INITIAL_COUNT)
+    setCurrentIndex(i => (products.length > 0 ? Math.min(i, products.length - 1) : 0))
+  }, [products.length])
+
+  function toggleFilter(key) {
+    setFilters(f => ({ ...f, [key]: !f[key] }))
+  }
+
+  function setDifficulty(val) {
+    setFilters(f => ({ ...f, difficulty: f.difficulty === val ? null : val }))
+  }
+
+  function clearFilters() {
+    setFilters(EMPTY_FILTERS)
+  }
+
   if (loading) {
     return (
       <main className="flex-1 flex items-center justify-center bg-black">
@@ -39,6 +69,14 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
   }
 
   if (isMobile) {
+    if (products.length === 0) {
+      return (
+        <main className="flex-1 flex items-center justify-center bg-black">
+          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>No plants found</span>
+        </main>
+      )
+    }
+
     const goNext = () => {
       setDirection(1)
       setCurrentIndex(i => (i + 1) % products.length)
@@ -65,7 +103,6 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
           </motion.div>
         </AnimatePresence>
 
-        {/* Vertical navigation buttons */}
         <div className="absolute right-4 z-50 flex flex-col gap-3" style={{ top: '50%', transform: 'translateY(-50%)' }}>
           <button
             onClick={goPrev}
@@ -92,19 +129,22 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
     )
   }
 
+  const visibleProducts = products.slice(0, visibleCount)
+
   return (
     <main className="flex-1 overflow-y-auto">
       <Hero onSignUpOpen={onSignUpOpen} />
 
       <section id="shop" style={{ background: '#f5f2ed', paddingTop: '6rem', paddingBottom: '6rem' }}>
         <div style={{ paddingLeft: '5rem', paddingRight: '5rem' }}>
+
           {/* Section header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: '-60px' }}
             transition={{ duration: 0.6, ease }}
-            style={{ marginBottom: '4rem' }}
+            style={{ marginBottom: '2rem' }}
           >
             <p className="text-[#76974a] text-xs font-semibold tracking-[0.25em] uppercase mb-3">
               Our Collection
@@ -112,41 +152,77 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
             <h2 className="font-display text-4xl font-bold text-black leading-tight">Hand-picked plants</h2>
           </motion.div>
 
-          {/* Staggered bento grid */}
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-            {products.slice(0, visibleCount).map((product, i) => (
-              <motion.div
-                key={product.id}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ duration: 0.55, delay: (i % 4) * 0.08, ease }}
-                style={{ paddingBottom: '1.5rem' }}
-              >
-                <ProductCard product={product} onAddToCart={onAddToCart} isMobile={false} />
-              </motion.div>
-            ))}
-          </div>
+          {/* Filter bar */}
+          <FilterBar
+            filters={filters}
+            onToggle={toggleFilter}
+            onDifficulty={setDifficulty}
+            onClear={clearFilters}
+            total={products.length}
+          />
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, ease }}
-            style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem' }}
-          >
-            {visibleCount < products.length ? (
+          {/* Empty state */}
+          {products.length === 0 ? (
+            <div style={{ textAlign: 'center', paddingTop: '4rem', paddingBottom: '4rem' }}>
+              <p style={{ color: '#999', fontSize: '1rem', marginBottom: '1.25rem' }}>
+                No plants match your current filters.
+              </p>
               <button
-                onClick={() => setVisibleCount(c => Math.min(c + ITEMS_PER_ROW, products.length))}
-                className="border border-[#678649] text-[#678649] hover:bg-[#678649] hover:text-white transition-colors font-semibold rounded-full cursor-pointer"
-                style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem', paddingTop: '0.875rem', paddingBottom: '0.875rem', fontSize: '0.9rem' }}
+                onClick={clearFilters}
+                className="cursor-pointer hover:opacity-75 transition-opacity"
+                style={{
+                  background: 'none',
+                  border: '1px solid #678649',
+                  color: '#678649',
+                  borderRadius: '999px',
+                  padding: '0.6rem 1.75rem',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                }}
               >
-                See More
+                Clear filters
               </button>
-            ) : visibleCount > INITIAL_COUNT ? (
-              <p className="text-stone-400 text-sm font-light tracking-wide">End of the catalogue</p>
-            ) : null}
-          </motion.div>
+            </div>
+          ) : (
+            <>
+              {/* Bento grid */}
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                {visibleProducts.map((product, i) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 40 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-40px' }}
+                    transition={{ duration: 0.55, delay: (i % 4) * 0.08, ease }}
+                    style={{ paddingBottom: '1.5rem' }}
+                  >
+                    <ProductCard product={product} onAddToCart={onAddToCart} isMobile={false} />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, ease }}
+                style={{ display: 'flex', justifyContent: 'center', marginTop: '3rem' }}
+              >
+                {visibleCount < products.length ? (
+                  <button
+                    onClick={() => setVisibleCount(c => Math.min(c + ITEMS_PER_ROW, products.length))}
+                    className="border border-[#678649] text-[#678649] hover:bg-[#678649] hover:text-white transition-colors font-semibold rounded-full cursor-pointer"
+                    style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem', paddingTop: '0.875rem', paddingBottom: '0.875rem', fontSize: '0.9rem' }}
+                  >
+                    See More
+                  </button>
+                ) : products.length > INITIAL_COUNT ? (
+                  <p className="text-stone-400 text-sm font-light tracking-wide">End of the catalogue</p>
+                ) : null}
+              </motion.div>
+            </>
+          )}
         </div>
       </section>
 
