@@ -49,17 +49,16 @@ export default function Hero() {
           <motion.div {...fadeUp(0.52)} className="flex gap-4 mt-2">
             <button
               onClick={scrollToGrid}
-              className="bg-[#678649] hover:bg-[#76974a] text-white font-semibold rounded-xl transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-[#678649]/30"
+              className="bg-[#678649] hover:bg-[#76974a] text-white font-semibold rounded-full transition-all duration-300 cursor-pointer hover:shadow-lg hover:shadow-[#678649]/30"
               style={{ paddingLeft: '2rem', paddingRight: '2rem', paddingTop: '1rem', paddingBottom: '1rem', fontSize: '1rem' }}
             >
               Shop Now
             </button>
             <button
-              onClick={scrollToGrid}
-              className="border border-white/25 hover:border-white/60 hover:bg-white/5 text-white rounded-xl transition-all duration-300 cursor-pointer"
+              className="border border-white/25 hover:border-white/60 hover:bg-white/5 text-white rounded-full transition-all duration-300 cursor-pointer"
               style={{ paddingLeft: '2rem', paddingRight: '2rem', paddingTop: '1rem', paddingBottom: '1rem', fontSize: '1rem' }}
             >
-              Browse Collection
+              Sign Up
             </button>
           </motion.div>
 

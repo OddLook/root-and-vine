@@ -32,7 +32,8 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -40 }}
               transition={{ duration: 0.3 }}
-              className="absolute inset-0 flex flex-col justify-end items-center text-center px-8 pb-10 gap-3"
+              className="absolute inset-0 flex flex-col justify-end items-center text-center gap-3"
+              style={{ paddingLeft: '2rem', paddingRight: '2rem', paddingBottom: '2.5rem' }}
             >
               <h2 className="font-display text-white text-3xl font-bold leading-tight">{product.name}</h2>
               <p className="text-white/80 text-base leading-relaxed">{product.description}</p>
@@ -40,13 +41,15 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
               <div className="flex gap-3 w-full mt-1">
                 <button
                   onClick={() => setFlipped(true)}
-                  className="flex-1 min-h-[44px] px-5 py-2.5 rounded-full border border-white/50 text-white text-sm hover:bg-white/10 transition-colors cursor-pointer"
+                  className="flex-1 min-h-[44px] rounded-full border border-white/50 text-white text-sm hover:bg-white/10 transition-colors cursor-pointer"
+                  style={{ paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
                 >
                   Care Info
                 </button>
                 <button
                   onClick={() => onAddToCart(product)}
-                  className="flex-1 min-h-[44px] px-5 py-2.5 rounded-full bg-[#678649] text-white text-sm font-semibold hover:bg-[#76974a] transition-colors cursor-pointer"
+                  className="flex-1 min-h-[44px] rounded-full bg-[#678649] text-white text-sm font-semibold hover:bg-[#76974a] transition-colors cursor-pointer"
+                  style={{ paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
                 >
                   Add to Cart
                 </button>
@@ -59,7 +62,8 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -40 }}
               transition={{ duration: 0.3 }}
-              className="absolute inset-0 flex flex-col justify-end items-center text-center px-8 pb-10 gap-5"
+              className="absolute inset-0 flex flex-col justify-end items-center text-center gap-5"
+              style={{ paddingLeft: '2rem', paddingRight: '2rem', paddingBottom: '2.5rem' }}
             >
               <h2 className="font-display text-white text-2xl font-bold">{product.name} — Care Guide</h2>
               <div className="grid grid-cols-2 gap-4 w-full">
@@ -70,7 +74,8 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
               </div>
               <button
                 onClick={() => setFlipped(false)}
-                className="w-full min-h-[44px] px-5 py-2.5 rounded-full border border-white/50 text-white text-sm hover:bg-white/10 transition-colors cursor-pointer"
+                className="w-full min-h-[44px] rounded-full border border-white/50 text-white text-sm hover:bg-white/10 transition-colors cursor-pointer"
+                style={{ paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
               >
                 ← Back
               </button>
@@ -83,7 +88,7 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
 
   // Desktop bento card
   return (
-    <div onClick={() => setFlipped(true)} className="relative rounded-2xl overflow-hidden bg-gray-100 aspect-[3/4] group cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/20">
+    <div onClick={() => setFlipped(f => !f)} className="relative rounded-2xl overflow-hidden bg-gray-100 aspect-[3/4] group cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/20">
       <img
         src={product.image}
         alt={product.name}
@@ -133,12 +138,7 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
               <CareDetail label="Humidity" value={product.care.humidity} />
               <CareDetail label="Difficulty" value={product.care.difficulty} />
             </div>
-            <button
-              onClick={(e) => { e.stopPropagation(); setFlipped(false); }}
-              className="w-full min-h-[44px] px-4 py-2 rounded-full border border-white/50 text-white text-sm hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              ← Back
-            </button>
+            <p className="text-white/60 text-xs">Click card to go back</p>
           </motion.div>
         )}
       </AnimatePresence>

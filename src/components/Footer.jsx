@@ -8,7 +8,7 @@ export default function Footer() {
   return (
     <footer className="bg-black text-white">
       <div style={{ paddingLeft: '5rem', paddingRight: '5rem', paddingTop: '4.8rem', paddingBottom: '4.8rem' }}>
-        <div className="grid grid-cols-4 gap-12 pb-14 border-b border-white/10">
+        <div className="grid grid-cols-4 gap-12 border-b border-white/10" style={{ paddingBottom: '4rem' }}>
           {/* Brand */}
           <div className="flex flex-col gap-5">
             <span className="font-display text-xl font-bold">Root & Vine</span>
@@ -52,7 +52,7 @@ export default function Footer() {
           ))}
         </div>
 
-        <div className="flex items-center justify-between pt-6 text-white/30 text-xs">
+        <div className="flex items-center justify-between text-white/30 text-xs" style={{ marginTop: '3rem' }}>
           <span>© {new Date().getFullYear()} Root & Vine. All rights reserved.</span>
           <div className="flex gap-6">
             <a href="#" className="hover:text-white/60 transition-colors cursor-pointer">Privacy Policy</a>
