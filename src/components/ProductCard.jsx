@@ -17,7 +17,7 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
     return (
       <div className="relative w-full h-full overflow-hidden cursor-pointer" onClick={() => setFlipped(f => !f)}>
         <img
-          src={product.image}
+          src={product.img_url}
           alt={product.name}
           loading="lazy"
           className="absolute inset-0 w-full h-full object-cover"
@@ -58,10 +58,10 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
             >
               <h2 className="font-display text-white text-2xl font-bold">{product.name} — Care Guide</h2>
               <div className="grid grid-cols-2 gap-4 w-full">
-                <CareDetail label="Light" value={product.care.light} />
-                <CareDetail label="Water" value={product.care.water} />
-                <CareDetail label="Humidity" value={product.care.humidity} />
-                <CareDetail label="Difficulty" value={product.care.difficulty} />
+                <CareDetail label="Light" value={product.light} />
+                <CareDetail label="Water" value={product.water} />
+                <CareDetail label="Humidity" value={product.humidity} />
+                <CareDetail label="Difficulty" value={product.difficulty} />
               </div>
               <p className="text-white/50 text-xs">Tap card to go back</p>
             </motion.div>
@@ -75,7 +75,7 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
   return (
     <div onClick={() => setFlipped(f => !f)} className="relative rounded-2xl overflow-hidden bg-gray-100 aspect-[3/4] group cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/20">
       <img
-        src={product.image}
+        src={product.img_url}
         alt={product.name}
         loading="lazy"
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -118,10 +118,10 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
           >
             <h3 className="font-display text-white font-bold text-lg">Care Guide</h3>
             <div className="grid grid-cols-2 gap-3 w-full">
-              <CareDetail label="Light" value={product.care.light} />
-              <CareDetail label="Water" value={product.care.water} />
-              <CareDetail label="Humidity" value={product.care.humidity} />
-              <CareDetail label="Difficulty" value={product.care.difficulty} />
+              <CareDetail label="Light" value={product.light} />
+              <CareDetail label="Water" value={product.water} />
+              <CareDetail label="Humidity" value={product.humidity} />
+              <CareDetail label="Difficulty" value={product.difficulty} />
             </div>
             <p className="text-white/60 text-xs">Click card to go back</p>
           </motion.div>

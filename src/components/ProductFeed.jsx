@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import ProductCard from './ProductCard'
 import Hero from './Hero'
 import Footer from './Footer'
-import { products } from '../data/products'
+import { useProducts } from '../hooks/useProducts'
 
 const ease = [0.25, 0.46, 0.45, 0.94]
 
@@ -17,6 +17,7 @@ const cardVariants = {
 }
 
 export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
+  const { products, loading } = useProducts()
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -28,6 +29,14 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
     mq.addEventListener('change', handler)
     return () => mq.removeEventListener('change', handler)
   }, [])
+
+  if (loading) {
+    return (
+      <main className="flex-1 flex items-center justify-center bg-black">
+        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', letterSpacing: '0.1em' }}>Loading…</span>
+      </main>
+    )
+  }
 
   if (isMobile) {
     const goNext = () => {
