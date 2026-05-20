@@ -1,4 +1,6 @@
-export default function Topbar({ cartCount, onCartOpen, onMenuOpen, user, onLoginOpen, onSignOut }) {
+import { Link } from 'react-router-dom'
+
+export default function Topbar({ cartCount, onCartOpen, onMenuOpen, user, isAdmin, onLoginOpen, onSignOut }) {
   return (
     <header className="bg-black text-white shrink-0 z-50 border-b border-[#76974a]/20">
       <div
@@ -30,6 +32,23 @@ export default function Topbar({ cartCount, onCartOpen, onMenuOpen, user, onLogi
 
         {/* Right side */}
         <div className="flex items-center gap-4">
+
+          {/* Admin dashboard icon — only for admins */}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="relative p-2 hover:opacity-75 transition-opacity cursor-pointer"
+              aria-label="Admin dashboard"
+              title="Admin dashboard"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#678649" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+            </Link>
+          )}
 
           {/* Search — all screens */}
           <button
