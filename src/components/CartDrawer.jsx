@@ -53,7 +53,7 @@ export default function CartDrawer({ isOpen, onClose, cart, onRemove }) {
                 cart.map(item => (
                   <div key={item.id} className="flex gap-4 items-center">
                     <img
-                      src={item.image}
+                      src={item.img_url}
                       alt={item.name}
                       className="object-cover shrink-0"
                       style={{ width: '48px', height: '48px', borderRadius: '50%' }}

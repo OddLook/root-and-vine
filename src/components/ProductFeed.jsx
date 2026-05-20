@@ -35,6 +35,7 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState(1)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)')
@@ -70,62 +71,170 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
   }
 
   if (isMobile) {
-    if (products.length === 0) {
-      return (
-        <main className="flex-1 flex items-center justify-center bg-black">
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem' }}>No plants found</span>
-        </main>
-      )
-    }
+    const activeCount = Object.entries(filters).filter(([k, v]) => k !== 'difficulty' && v !== false && v !== null).length
 
     const goNext = () => {
+      if (products.length === 0) return
       setDirection(1)
       setCurrentIndex(i => (i + 1) % products.length)
     }
     const goPrev = () => {
+      if (products.length === 0) return
       setDirection(-1)
       setCurrentIndex(i => (i - 1 + products.length) % products.length)
     }
 
+    const MOBILE_FILTERS = [
+      { key: 'indoor',        label: 'Indoor' },
+      { key: 'outdoor',       label: 'Outdoor' },
+      { key: 'pet_friendly',  label: 'Pet Friendly' },
+      { key: 'air_purifying', label: 'Air Purifying' },
+      { key: 'rare',          label: 'Rare' },
+      { key: 'sale',          label: 'On Sale' },
+    ]
+
     return (
       <main className="flex-1 relative overflow-hidden bg-black">
+        {/* Card */}
         <AnimatePresence custom={direction} mode="wait">
-          <motion.div
-            key={products[currentIndex].id}
-            custom={direction}
-            variants={cardVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="absolute inset-0"
-          >
-            <ProductCard product={products[currentIndex]} onAddToCart={onAddToCart} isMobile />
-          </motion.div>
+          {products.length > 0 ? (
+            <motion.div
+              key={products[currentIndex].id}
+              custom={direction}
+              variants={cardVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="absolute inset-0"
+            >
+              <ProductCard product={products[currentIndex]} onAddToCart={onAddToCart} isMobile />
+            </motion.div>
+          ) : (
+            <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+              <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.95rem' }}>No plants match your filters</p>
+              <button onClick={clearFilters} style={{ color: '#678649', background: 'none', border: '1px solid #678649', borderRadius: '999px', padding: '0.5rem 1.5rem', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
+                Clear filters
+              </button>
+            </motion.div>
+          )}
         </AnimatePresence>
 
-        <div className="absolute right-4 z-50 flex flex-col gap-3" style={{ top: '50%', transform: 'translateY(-50%)' }}>
-          <button
-            onClick={goPrev}
-            className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-colors"
-            style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }}
-            aria-label="Previous plant"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="18 15 12 9 6 15" />
-            </svg>
+        {/* Prev / Next */}
+        <div className="absolute right-4 z-30 flex flex-col gap-3" style={{ top: '50%', transform: 'translateY(-50%)' }}>
+          <button onClick={goPrev} className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer" style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }} aria-label="Previous plant">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15" /></svg>
           </button>
-          <button
-            onClick={goNext}
-            className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-colors"
-            style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }}
-            aria-label="Next plant"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
+          <button onClick={goNext} className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer" style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }} aria-label="Next plant">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
           </button>
         </div>
+
+        {/* Filter button — bottom left */}
+        <div className="absolute left-4 z-30" style={{ bottom: '2.25rem' }}>
+          <button
+            onClick={() => setIsFilterOpen(true)}
+            className="flex items-center gap-2 cursor-pointer"
+            style={{
+              padding: '0.5rem 1.1rem',
+              borderRadius: '999px',
+              border: activeCount > 0 ? '1.5px solid #678649' : '1px solid rgba(255,255,255,0.3)',
+              background: activeCount > 0 ? 'rgba(103,134,73,0.18)' : 'rgba(255,255,255,0.12)',
+              backdropFilter: 'blur(8px)',
+              color: activeCount > 0 ? '#90b85e' : 'rgba(255,255,255,0.85)',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+            }}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
+            </svg>
+            Filter
+            {activeCount > 0 && (
+              <span style={{ background: '#678649', color: '#fff', borderRadius: '999px', fontSize: '0.68rem', fontWeight: 700, padding: '0.05rem 0.45rem' }}>
+                {activeCount}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Filter bottom sheet */}
+        <AnimatePresence>
+          {isFilterOpen && (
+            <>
+              <motion.div
+                key="sheet-backdrop"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                onClick={() => setIsFilterOpen(false)}
+                className="absolute inset-0 z-40"
+                style={{ background: 'rgba(0,0,0,0.5)' }}
+              />
+              <motion.div
+                key="sheet"
+                initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+                transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+                className="absolute bottom-0 left-0 right-0 z-50"
+                style={{ background: '#111', borderRadius: '1.25rem 1.25rem 0 0', padding: '1.25rem 1.5rem 2.5rem' }}
+              >
+                {/* Handle */}
+                <div style={{ width: '36px', height: '4px', borderRadius: '2px', background: 'rgba(255,255,255,0.2)', margin: '0 auto 1.25rem' }} />
+
+                <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.7rem', fontWeight: 600, letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: '1rem' }}>
+                  Filter plants
+                </p>
+
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                  {MOBILE_FILTERS.map(({ key, label }) => {
+                    const active = filters[key]
+                    const isSale = key === 'sale'
+                    return (
+                      <button
+                        key={key}
+                        onClick={() => toggleFilter(key)}
+                        style={{
+                          padding: '0.55rem 1.15rem',
+                          borderRadius: '999px',
+                          border: isSale
+                            ? `1.5px solid ${active ? '#678649' : '#678649'}`
+                            : `1px solid ${active ? '#fff' : 'rgba(255,255,255,0.2)'}`,
+                          background: isSale
+                            ? (active ? '#678649' : 'transparent')
+                            : (active ? '#fff' : 'transparent'),
+                          color: isSale
+                            ? (active ? '#fff' : '#90b85e')
+                            : (active ? '#111' : 'rgba(255,255,255,0.7)'),
+                          fontSize: '0.85rem',
+                          fontWeight: active ? 600 : 400,
+                          cursor: 'pointer',
+                          minHeight: '44px',
+                        }}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  {activeCount > 0 && (
+                    <button
+                      onClick={() => { clearFilters(); setIsFilterOpen(false) }}
+                      style={{ flex: 1, padding: '0.875rem', borderRadius: '999px', border: '1px solid rgba(255,255,255,0.2)', background: 'transparent', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', fontWeight: 500, cursor: 'pointer' }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setIsFilterOpen(false)}
+                    style={{ flex: 2, padding: '0.875rem', borderRadius: '999px', background: '#678649', border: 'none', color: '#fff', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    {activeCount > 0 ? `Show ${products.length} plant${products.length === 1 ? '' : 's'}` : 'Done'}
+                  </button>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </main>
     )
   }

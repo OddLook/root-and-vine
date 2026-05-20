@@ -49,21 +49,10 @@ export default function Topbar({ cartCount, onCartOpen, onMenuOpen, user, onLogi
             aria-label={user ? 'Sign out' : 'Login'}
             title={user ? `Signed in as ${user.email} — click to sign out` : 'Sign in'}
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={user ? '#678649' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="8" r="4" />
               <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
             </svg>
-            {user && (
-              <span
-                style={{
-                  position: 'absolute', top: '4px', right: '4px',
-                  width: '8px', height: '8px',
-                  borderRadius: '50%',
-                  background: '#678649',
-                  border: '1.5px solid #000',
-                }}
-              />
-            )}
           </button>
 
           {/* Cart — all screens */}
