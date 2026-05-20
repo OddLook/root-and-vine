@@ -12,6 +12,7 @@ const INITIAL_COUNT = 8
 const ITEMS_PER_ROW = 4
 
 const EMPTY_FILTERS = {
+  indoor: false,
   pet_friendly: false,
   air_purifying: false,
   outdoor: false,
@@ -156,7 +157,6 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
           <FilterBar
             filters={filters}
             onToggle={toggleFilter}
-            onDifficulty={setDifficulty}
             onClear={clearFilters}
             total={products.length}
           />
