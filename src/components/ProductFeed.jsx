@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import ProductCard from './ProductCard'
 import Hero from './Hero'
 import Footer from './Footer'
@@ -10,9 +10,17 @@ const ease = [0.25, 0.46, 0.45, 0.94]
 const INITIAL_COUNT = 8
 const ITEMS_PER_ROW = 4
 
+const cardVariants = {
+  enter: (dir) => ({ y: dir > 0 ? '100%' : '-100%', opacity: 0 }),
+  center: { y: 0, opacity: 1 },
+  exit: (dir) => ({ y: dir > 0 ? '-100%' : '100%', opacity: 0 }),
+}
+
 export default function ProductFeed({ onAddToCart }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [direction, setDirection] = useState(1)
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)')
@@ -22,13 +30,55 @@ export default function ProductFeed({ onAddToCart }) {
   }, [])
 
   if (isMobile) {
+    const goNext = () => {
+      setDirection(1)
+      setCurrentIndex(i => (i + 1) % products.length)
+    }
+    const goPrev = () => {
+      setDirection(-1)
+      setCurrentIndex(i => (i - 1 + products.length) % products.length)
+    }
+
     return (
-      <main className="flex-1 overflow-y-scroll snap-y snap-mandatory">
-        {products.map(product => (
-          <div key={product.id} className="h-[calc(100svh-52px)] snap-start shrink-0">
-            <ProductCard product={product} onAddToCart={onAddToCart} isMobile />
-          </div>
-        ))}
+      <main className="flex-1 relative overflow-hidden bg-black">
+        <AnimatePresence custom={direction} mode="wait">
+          <motion.div
+            key={products[currentIndex].id}
+            custom={direction}
+            variants={cardVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="absolute inset-0"
+          >
+            <ProductCard product={products[currentIndex]} onAddToCart={onAddToCart} isMobile />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Vertical navigation buttons */}
+        <div className="absolute right-4 z-50 flex flex-col gap-3" style={{ top: '50%', transform: 'translateY(-50%)' }}>
+          <button
+            onClick={goPrev}
+            className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-colors"
+            style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }}
+            aria-label="Previous plant"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="18 15 12 9 6 15" />
+            </svg>
+          </button>
+          <button
+            onClick={goNext}
+            className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-colors"
+            style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }}
+            aria-label="Next plant"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+        </div>
       </main>
     )
   }

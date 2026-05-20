@@ -15,7 +15,7 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
 
   if (isMobile) {
     return (
-      <div className="relative w-full h-full snap-start shrink-0 overflow-hidden">
+      <div className="relative w-full h-full overflow-hidden cursor-pointer" onClick={() => setFlipped(f => !f)}>
         <img
           src={product.image}
           alt={product.name}
@@ -38,22 +38,13 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
               <h2 className="font-display text-white text-3xl font-bold leading-tight">{product.name}</h2>
               <p className="text-white/80 text-base leading-relaxed">{product.description}</p>
               <span className="font-display text-white text-2xl font-bold mt-2">${product.price}</span>
-              <div className="flex gap-3 w-full mt-1">
-                <button
-                  onClick={() => setFlipped(true)}
-                  className="flex-1 min-h-[44px] rounded-full border border-white/50 text-white text-sm hover:bg-white/10 transition-colors cursor-pointer"
-                  style={{ paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
-                >
-                  Care Info
-                </button>
-                <button
-                  onClick={() => onAddToCart(product)}
-                  className="flex-1 min-h-[44px] rounded-full bg-[#678649] text-white text-sm font-semibold hover:bg-[#76974a] transition-colors cursor-pointer"
-                  style={{ paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
-                >
-                  Add to Cart
-                </button>
-              </div>
+              <button
+                onClick={(e) => { e.stopPropagation(); onAddToCart(product) }}
+                className="w-full min-h-[44px] rounded-full bg-[#678649] text-white text-sm font-semibold hover:bg-[#76974a] transition-colors cursor-pointer mt-1"
+                style={{ paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
+              >
+                Add to Cart
+              </button>
             </motion.div>
           ) : (
             <motion.div
@@ -72,13 +63,7 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
                 <CareDetail label="Humidity" value={product.care.humidity} />
                 <CareDetail label="Difficulty" value={product.care.difficulty} />
               </div>
-              <button
-                onClick={() => setFlipped(false)}
-                className="w-full min-h-[44px] rounded-full border border-white/50 text-white text-sm hover:bg-white/10 transition-colors cursor-pointer"
-                style={{ paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
-              >
-                ← Back
-              </button>
+              <p className="text-white/50 text-xs">Tap card to go back</p>
             </motion.div>
           )}
         </AnimatePresence>
