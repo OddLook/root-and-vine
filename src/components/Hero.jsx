@@ -8,7 +8,7 @@ const fadeUp = (delay) => ({
   transition: { duration: 0.75, delay, ease },
 })
 
-export default function Hero() {
+export default function Hero({ onSignUpOpen }) {
   function scrollToGrid() {
     document.getElementById('shop')?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -55,6 +55,7 @@ export default function Hero() {
               Shop Now
             </button>
             <button
+              onClick={onSignUpOpen}
               className="border border-white/25 hover:border-white/60 hover:bg-white/5 text-white rounded-full transition-all duration-300 cursor-pointer"
               style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem', paddingTop: '1rem', paddingBottom: '1rem', fontSize: '1rem', minWidth: '11rem' }}
             >

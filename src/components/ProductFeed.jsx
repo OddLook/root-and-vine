@@ -16,7 +16,7 @@ const cardVariants = {
   exit: (dir) => ({ y: dir > 0 ? '-100%' : '100%', opacity: 0 }),
 }
 
-export default function ProductFeed({ onAddToCart }) {
+export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [visibleCount, setVisibleCount] = useState(INITIAL_COUNT)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -85,7 +85,7 @@ export default function ProductFeed({ onAddToCart }) {
 
   return (
     <main className="flex-1 overflow-y-auto">
-      <Hero />
+      <Hero onSignUpOpen={onSignUpOpen} />
 
       <section id="shop" style={{ background: '#f5f2ed', paddingTop: '6rem', paddingBottom: '6rem' }}>
         <div style={{ paddingLeft: '5rem', paddingRight: '5rem' }}>
