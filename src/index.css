@@ -19,13 +19,34 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Hide scrollbar while preserving scroll functionality */
+/* Hide scrollbar while preserving scroll functionality (mobile) */
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Custom scrollbar for desktop and iPad (768px+) */
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #ffffff;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #111111;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #444444;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #111111 #ffffff;
+  }
 }
 
 /* Grain texture overlay for hero depth */
