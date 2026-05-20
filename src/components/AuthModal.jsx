@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onSignIn, onSignUp }) {
@@ -8,6 +8,25 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    const handler = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  // Sync mode and reset form whenever modal opens
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialMode)
+      setEmail('')
+      setPassword('')
+      setError(null)
+      setSuccess(false)
+    }
+  }, [isOpen, initialMode])
 
   function switchMode(next) {
     setMode(next)
@@ -41,14 +60,28 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
 
   const inputStyle = {
     width: '100%',
-    padding: '0.75rem 1rem',
+    padding: isMobile ? '0.65rem 0.875rem' : '0.75rem 1rem',
     borderRadius: '0.5rem',
     border: '1px solid rgba(255,255,255,0.15)',
     background: 'rgba(255,255,255,0.07)',
     color: '#fff',
-    fontSize: '0.95rem',
+    fontSize: isMobile ? '0.9rem' : '0.95rem',
     outline: 'none',
   }
+
+  const modalStyle = isMobile
+    ? {
+        maxWidth: '310px',
+        width: 'calc(100% - 2.5rem)',
+        padding: '1.75rem 1.5rem 1.5rem',
+        borderRadius: '1rem',
+      }
+    : {
+        maxWidth: '420px',
+        width: '100%',
+        padding: '2.5rem 2.25rem 2rem',
+        borderRadius: '1.25rem',
+      }
 
   return (
     <AnimatePresence>
@@ -81,34 +114,44 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
               top: '50%', left: '50%',
               transform: 'translate(-50%, -50%)',
               zIndex: 201,
-              width: '100%',
-              maxWidth: '420px',
               background: '#111',
-              borderRadius: '1.25rem',
               border: '1px solid rgba(255,255,255,0.10)',
-              padding: '2.5rem 2.25rem 2rem',
               color: '#fff',
+              ...modalStyle,
             }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Brand */}
-            <p style={{ fontFamily: 'var(--font-display, serif)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '1.75rem', textAlign: 'center', letterSpacing: '0.02em' }}>
+            <p style={{
+              fontFamily: 'var(--font-display, serif)',
+              fontSize: isMobile ? '1.05rem' : '1.2rem',
+              fontWeight: 700,
+              marginBottom: isMobile ? '1.25rem' : '1.75rem',
+              textAlign: 'center',
+              letterSpacing: '0.02em',
+            }}>
               Root &amp; Vine
             </p>
 
             {/* Tabs */}
-            <div style={{ display: 'flex', gap: '0', marginBottom: '2rem', background: 'rgba(255,255,255,0.07)', borderRadius: '0.6rem', padding: '3px' }}>
+            <div style={{
+              display: 'flex',
+              marginBottom: isMobile ? '1.25rem' : '2rem',
+              background: 'rgba(255,255,255,0.07)',
+              borderRadius: '0.6rem',
+              padding: '3px',
+            }}>
               {[['signin', 'Sign In'], ['signup', 'Create Account']].map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => switchMode(key)}
                   style={{
                     flex: 1,
-                    padding: '0.55rem 0',
+                    padding: isMobile ? '0.45rem 0' : '0.55rem 0',
                     borderRadius: '0.45rem',
                     border: 'none',
                     cursor: 'pointer',
-                    fontSize: '0.875rem',
+                    fontSize: isMobile ? '0.8rem' : '0.875rem',
                     fontWeight: 600,
                     transition: 'all 0.18s ease',
                     background: mode === key ? '#fff' : 'transparent',
@@ -121,16 +164,16 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
             </div>
 
             {success ? (
-              <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🌱</div>
-                <p style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Check your email</p>
-                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.55 }}>
+              <div style={{ textAlign: 'center', padding: isMobile ? '1rem 0' : '1.5rem 0' }}>
+                <div style={{ fontSize: isMobile ? '1.6rem' : '2rem', marginBottom: '0.75rem' }}>🌱</div>
+                <p style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: isMobile ? '0.95rem' : '1rem' }}>Check your email</p>
+                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', lineHeight: 1.55 }}>
                   We sent a confirmation link to<br />
                   <span style={{ color: '#fff' }}>{email}</span>
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '0.75rem' : '1rem' }}>
                 <input
                   type="email"
                   placeholder="Email address"
@@ -150,20 +193,20 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
                 />
 
                 {error && (
-                  <p style={{ color: '#f87171', fontSize: '0.85rem', textAlign: 'center' }}>{error}</p>
+                  <p style={{ color: '#f87171', fontSize: '0.82rem', textAlign: 'center' }}>{error}</p>
                 )}
 
                 <button
                   type="submit"
                   disabled={loading}
                   style={{
-                    marginTop: '0.5rem',
-                    padding: '1rem',
+                    marginTop: isMobile ? '0.25rem' : '0.5rem',
+                    padding: isMobile ? '0.75rem' : '1rem',
                     background: loading ? 'rgba(103,134,73,0.6)' : '#678649',
                     color: '#fff',
                     border: 'none',
                     borderRadius: '999px',
-                    fontSize: '1rem',
+                    fontSize: isMobile ? '0.9rem' : '1rem',
                     fontWeight: 600,
                     cursor: loading ? 'not-allowed' : 'pointer',
                     transition: 'background 0.2s ease',
@@ -179,12 +222,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
               onClick={onClose}
               aria-label="Close"
               style={{
-                position: 'absolute', top: '1.1rem', right: '1.1rem',
+                position: 'absolute',
+                top: isMobile ? '0.85rem' : '1.1rem',
+                right: isMobile ? '0.85rem' : '1.1rem',
                 background: 'none', border: 'none', cursor: 'pointer',
                 color: 'rgba(255,255,255,0.45)', padding: '4px',
               }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
