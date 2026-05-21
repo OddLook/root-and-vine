@@ -27,7 +27,7 @@ export default function Topbar({ cartCount, onCartOpen, onMenuOpen, user, isAdmi
             </svg>
           </button>
 
-          <span className="font-display text-xl font-bold tracking-wide">Root & Vine</span>
+          <Link to="/" className="font-display text-xl font-bold tracking-wide hover:opacity-80 transition-opacity">Root & Vine</Link>
         </div>
 
         {/* Right side */}
