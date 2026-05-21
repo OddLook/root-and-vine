@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+
+const BUCKET = 'product-images'
 
 const EMPTY_FORM = {
   name: '', scientific_name: '', description: '', price: '',
@@ -8,119 +10,243 @@ const EMPTY_FORM = {
   indoor: false, outdoor: false, pet_friendly: false, air_purifying: false, rare: false, discount: 0,
 }
 
+// ── Toast ─────────────────────────────────────────────────────────
+function useToast() {
+  const [toasts, setToasts] = useState([])
+  const show = useCallback((message, type = 'success') => {
+    const id = Date.now()
+    setToasts(ts => [...ts, { id, message, type }])
+    setTimeout(() => setToasts(ts => ts.filter(t => t.id !== id)), 3500)
+  }, [])
+  return { toasts, show }
+}
+
+function ToastStack({ toasts }) {
+  if (!toasts.length) return null
+  return (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex flex-col gap-2 z-[200] pointer-events-none" style={{ minWidth: 260 }}>
+      {toasts.map(t => (
+        <div
+          key={t.id}
+          className="px-4 py-3 rounded-lg text-sm font-medium shadow-xl text-white text-center"
+          style={{ background: t.type === 'error' ? '#dc2626' : '#76974a' }}
+        >
+          {t.message}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── Image upload helpers ──────────────────────────────────────────
+async function uploadImage(file) {
+  const ext = file.name.split('.').pop().toLowerCase()
+  const path = `${Date.now()}.${ext}`
+  const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: false })
+  if (error) throw error
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
+  return data.publicUrl
+}
+
+// ── Product modal ─────────────────────────────────────────────────
 function ProductModal({ product, onClose, onSaved }) {
   const [form, setForm] = useState(product ? { ...product } : { ...EMPTY_FORM })
+  const [file, setFile] = useState(null)
+  const [preview, setPreview] = useState(product?.img_url || null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+  const fileRef = useRef()
 
   function set(key, value) { setForm(f => ({ ...f, [key]: value })) }
+
+  function handleFileChange(e) {
+    const f = e.target.files[0]
+    if (!f) return
+    setFile(f)
+    setPreview(URL.createObjectURL(f))
+    set('img_url', '') // clear manual URL when a file is chosen
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setSaving(true)
     setError(null)
-    const payload = {
-      ...form,
-      price: parseFloat(form.price) || 0,
-      discount: parseInt(form.discount) || 0,
+    try {
+      let img_url = form.img_url
+      if (file) img_url = await uploadImage(file)
+
+      const { id: _id, created_at: _ca, ...fields } = form
+      const payload = {
+        ...fields,
+        img_url,
+        price: parseFloat(form.price) || 0,
+        discount: parseInt(form.discount) || 0,
+      }
+
+      if (product?.id) {
+        const { data, error: err } = await supabase
+          .from('products').update(payload).eq('id', product.id).select().single()
+        if (err) throw err
+        onSaved(data, 'updated')
+      } else {
+        const { data, error: err } = await supabase
+          .from('products').insert(payload).select().single()
+        if (err) throw err
+        onSaved(data, 'created')
+      }
+    } catch (err) {
+      setError(err.message)
+      setSaving(false)
     }
-    let err
-    if (product?.id) {
-      ;({ error: err } = await supabase.from('products').update(payload).eq('id', product.id))
-    } else {
-      const { id: _id, created_at: _ca, ...insert } = payload
-      ;({ error: err } = await supabase.from('products').insert(insert))
-    }
-    setSaving(false)
-    if (err) { setError(err.message); return }
-    onSaved()
   }
 
-  const field = (label, key, type = 'text', extra = {}) => (
-    <label key={key} className="flex flex-col gap-1 text-sm">
-      <span className="text-[rgba(255,255,255,0.5)] text-xs uppercase tracking-wider">{label}</span>
-      <input
-        type={type}
-        value={form[key]}
-        onChange={e => set(key, type === 'number' ? e.target.value : e.target.value)}
-        className="bg-[#1a1a1a] border border-[rgba(255,255,255,0.12)] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#76974a]"
-        {...extra}
-      />
-    </label>
-  )
-
-  const toggle = (label, key) => (
-    <label key={key} className="flex items-center gap-2 text-sm cursor-pointer select-none">
-      <input
-        type="checkbox"
-        checked={!!form[key]}
-        onChange={e => set(key, e.target.checked)}
-        className="accent-[#76974a] w-4 h-4"
-      />
-      <span className="text-white">{label}</span>
-    </label>
-  )
+  const inputCls = "bg-[#1a1a1a] border border-[rgba(255,255,255,0.12)] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#76974a]"
+  const labelCls = "flex flex-col gap-1 text-sm"
+  const capCls   = "text-[rgba(255,255,255,0.45)] text-xs uppercase tracking-wider"
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.8)' }}>
-      <div className="bg-[#111] rounded-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(255,255,255,0.08)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.85)' }}>
+      <div className="bg-[#111] rounded-xl w-full max-w-2xl mx-4 max-h-[92vh] overflow-y-auto">
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(255,255,255,0.08)] sticky top-0 bg-[#111] z-10">
           <h2 className="text-white font-semibold">{product?.id ? 'Edit Product' : 'New Product'}</h2>
-          <button onClick={onClose} className="text-[rgba(255,255,255,0.4)] hover:text-white text-xl leading-none">&times;</button>
+          <button onClick={onClose} className="text-[rgba(255,255,255,0.4)] hover:text-white text-2xl leading-none">&times;</button>
         </div>
+
         <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {field('Name', 'name', 'text', { required: true })}
-            {field('Scientific Name', 'scientific_name')}
-            {field('Price ($)', 'price', 'number', { step: '0.01', min: '0' })}
-            {field('Image URL', 'img_url')}
-            {field('Light', 'light')}
-            {field('Water', 'water')}
-            {field('Humidity', 'humidity')}
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-[rgba(255,255,255,0.5)] text-xs uppercase tracking-wider">Difficulty</span>
-              <select
-                value={form.difficulty}
-                onChange={e => set('difficulty', e.target.value)}
-                className="bg-[#1a1a1a] border border-[rgba(255,255,255,0.12)] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#76974a]"
+
+          {/* Image section */}
+          <div className="flex gap-4 items-start">
+            <div
+              className="w-24 h-24 rounded-lg border border-[rgba(255,255,255,0.12)] bg-[#1a1a1a] flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer hover:border-[#76974a] transition-colors"
+              onClick={() => fileRef.current.click()}
+              title="Click to upload image"
+            >
+              {preview
+                ? <img src={preview} alt="preview" className="w-full h-full object-cover" />
+                : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+              }
+            </div>
+            <div className="flex-1 flex flex-col gap-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/jpg,image/png,image/webp"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileRef.current.click()}
+                className="w-full px-3 py-2 rounded border border-[rgba(255,255,255,0.15)] text-[rgba(255,255,255,0.6)] hover:text-white hover:border-[#76974a] text-sm transition-colors text-left"
               >
-                {['Beginner', 'Easy', 'Intermediate', 'Advanced'].map(d => <option key={d}>{d}</option>)}
+                {file ? file.name : 'Upload image…'}
+              </button>
+              <label className={labelCls}>
+                <span className={capCls}>Or paste URL</span>
+                <input
+                  type="url"
+                  value={form.img_url}
+                  onChange={e => { set('img_url', e.target.value); if (e.target.value) { setFile(null); setPreview(e.target.value) } }}
+                  placeholder="https://…"
+                  className={inputCls}
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* Core fields */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <label className={labelCls}>
+              <span className={capCls}>Name *</span>
+              <input type="text" value={form.name} onChange={e => set('name', e.target.value)} required className={inputCls} />
+            </label>
+            <label className={labelCls}>
+              <span className={capCls}>Scientific Name</span>
+              <input type="text" value={form.scientific_name} onChange={e => set('scientific_name', e.target.value)} className={inputCls} />
+            </label>
+            <label className={labelCls}>
+              <span className={capCls}>Price ($)</span>
+              <input type="number" step="0.01" min="0" value={form.price} onChange={e => set('price', e.target.value)} className={inputCls} />
+            </label>
+            <label className={labelCls}>
+              <span className={capCls}>Discount</span>
+              <select value={form.discount} onChange={e => set('discount', parseInt(e.target.value))} className={inputCls}>
+                {[0, 10, 20, 30, 40, 50].map(d => (
+                  <option key={d} value={d}>{d === 0 ? 'None' : `${d}%`}</option>
+                ))}
               </select>
             </label>
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-[rgba(255,255,255,0.5)] text-xs uppercase tracking-wider">Discount (%)</span>
-              <select
-                value={form.discount}
-                onChange={e => set('discount', parseInt(e.target.value))}
-                className="bg-[#1a1a1a] border border-[rgba(255,255,255,0.12)] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#76974a]"
-              >
-                {[0, 10, 20, 30, 40, 50].map(d => <option key={d} value={d}>{d === 0 ? 'None' : `${d}%`}</option>)}
+            <label className={labelCls}>
+              <span className={capCls}>Light</span>
+              <input type="text" value={form.light} onChange={e => set('light', e.target.value)} className={inputCls} />
+            </label>
+            <label className={labelCls}>
+              <span className={capCls}>Water</span>
+              <input type="text" value={form.water} onChange={e => set('water', e.target.value)} className={inputCls} />
+            </label>
+            <label className={labelCls}>
+              <span className={capCls}>Humidity</span>
+              <input type="text" value={form.humidity} onChange={e => set('humidity', e.target.value)} className={inputCls} />
+            </label>
+            <label className={labelCls}>
+              <span className={capCls}>Difficulty</span>
+              <select value={form.difficulty} onChange={e => set('difficulty', e.target.value)} className={inputCls}>
+                {['Beginner', 'Easy', 'Intermediate', 'Advanced'].map(d => (
+                  <option key={d}>{d}</option>
+                ))}
               </select>
             </label>
           </div>
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="text-[rgba(255,255,255,0.5)] text-xs uppercase tracking-wider">Description</span>
+
+          <label className={labelCls}>
+            <span className={capCls}>Description</span>
             <textarea
               value={form.description}
               onChange={e => set('description', e.target.value)}
               rows={3}
-              className="bg-[#1a1a1a] border border-[rgba(255,255,255,0.12)] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#76974a] resize-none"
+              className={`${inputCls} resize-none`}
             />
           </label>
-          <div className="flex flex-wrap gap-4 pt-1">
-            {toggle('Indoor', 'indoor')}
-            {toggle('Outdoor', 'outdoor')}
-            {toggle('Pet Friendly', 'pet_friendly')}
-            {toggle('Air Purifying', 'air_purifying')}
-            {toggle('Rare', 'rare')}
+
+          {/* Boolean flags */}
+          <div className="flex flex-wrap gap-5 pt-1">
+            {[
+              ['indoor',       'Indoor'],
+              ['outdoor',      'Outdoor'],
+              ['pet_friendly', 'Pet Friendly'],
+              ['air_purifying','Air Purifying'],
+              ['rare',         'Rare'],
+            ].map(([key, label]) => (
+              <label key={key} className="flex items-center gap-2 text-sm cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={!!form[key]}
+                  onChange={e => set(key, e.target.checked)}
+                  className="accent-[#76974a] w-4 h-4"
+                />
+                <span className="text-white">{label}</span>
+              </label>
+            ))}
           </div>
+
           {error && <p className="text-red-400 text-sm">{error}</p>}
-          <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 rounded text-sm text-[rgba(255,255,255,0.6)] hover:text-white border border-[rgba(255,255,255,0.12)] hover:border-[rgba(255,255,255,0.3)] transition-colors">
+
+          <div className="flex justify-end gap-3 pt-2 border-t border-[rgba(255,255,255,0.06)] mt-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded text-sm text-[rgba(255,255,255,0.6)] hover:text-white border border-[rgba(255,255,255,0.12)] hover:border-[rgba(255,255,255,0.3)] transition-colors"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={saving} className="px-5 py-2 rounded text-sm bg-[#76974a] text-white hover:bg-[#678649] disabled:opacity-50 transition-colors">
-              {saving ? 'Saving…' : 'Save'}
+            <button
+              type="submit"
+              disabled={saving}
+              className="px-5 py-2 rounded text-sm bg-[#76974a] text-white hover:bg-[#678649] disabled:opacity-50 transition-colors"
+            >
+              {saving ? 'Saving…' : (product?.id ? 'Save Changes' : 'Add Product')}
             </button>
           </div>
         </form>
@@ -129,17 +255,20 @@ function ProductModal({ product, onClose, onSaved }) {
   )
 }
 
+// ── Helpers ───────────────────────────────────────────────────────
 const Flag = ({ on }) => (
-  <span style={{ color: on ? '#76974a' : 'rgba(255,255,255,0.2)', fontSize: '0.85rem' }}>
+  <span style={{ color: on ? '#76974a' : 'rgba(255,255,255,0.18)', fontSize: '0.85rem' }}>
     {on ? '✓' : '—'}
   </span>
 )
 
+// ── Admin Dashboard ───────────────────────────────────────────────
 export default function AdminDashboard() {
   const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [modal, setModal] = useState(null) // null | { product } (product=null for new)
+  const [loading, setLoading]   = useState(true)
+  const [modal, setModal]       = useState(null)   // null | { product }
   const [deleting, setDeleting] = useState(null)
+  const { toasts, show }        = useToast()
 
   async function load() {
     setLoading(true)
@@ -150,26 +279,42 @@ export default function AdminDashboard() {
 
   useEffect(() => { load() }, [])
 
-  async function handleDelete(id) {
-    if (!window.confirm('Delete this product? This cannot be undone.')) return
-    setDeleting(id)
-    await supabase.from('products').delete().eq('id', id)
+  async function handleDelete(product) {
+    if (!window.confirm(`Delete "${product.name}"? This cannot be undone.`)) return
+    setDeleting(product.id)
+    const { error } = await supabase.from('products').delete().eq('id', product.id)
     setDeleting(null)
-    setProducts(ps => ps.filter(p => p.id !== id))
+    if (error) {
+      show('Failed to delete product', 'error')
+      return
+    }
+    setProducts(ps => ps.filter(p => p.id !== product.id))
+    show(`"${product.name}" deleted`)
   }
 
-  function handleSaved() {
+  function handleSaved(savedProduct, action) {
     setModal(null)
-    load()
+    setProducts(ps =>
+      action === 'updated'
+        ? ps.map(p => p.id === savedProduct.id ? savedProduct : p)
+        : [...ps, savedProduct]
+    )
+    show(action === 'updated' ? `"${savedProduct.name}" updated` : `"${savedProduct.name}" added`)
   }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
+
       {/* Header */}
       <header className="bg-black border-b border-[rgba(255,255,255,0.08)] flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-4">
-          <Link to="/" className="text-[rgba(255,255,255,0.45)] hover:text-white text-sm flex items-center gap-1.5 transition-colors">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
+          <Link
+            to="/"
+            className="text-[rgba(255,255,255,0.45)] hover:text-white text-sm flex items-center gap-1.5 transition-colors"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M19 12H5M12 5l-7 7 7 7" />
+            </svg>
             Back to Store
           </Link>
           <span className="text-[rgba(255,255,255,0.15)]">/</span>
@@ -179,20 +324,20 @@ export default function AdminDashboard() {
           onClick={() => setModal({ product: null })}
           className="flex items-center gap-2 px-4 py-2 bg-[#76974a] hover:bg-[#678649] text-white text-sm rounded transition-colors"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
           Add Product
         </button>
       </header>
 
-      {/* Table */}
+      {/* Content */}
       <div className="px-6 py-6">
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-[rgba(255,255,255,0.4)] text-sm">{products.length} products</p>
-        </div>
+        <p className="text-[rgba(255,255,255,0.35)] text-sm mb-4">{products.length} products</p>
 
         {loading ? (
           <div className="flex items-center justify-center py-24">
-            <span className="text-[rgba(255,255,255,0.3)] text-sm tracking-widest">Loading…</span>
+            <span className="text-[rgba(255,255,255,0.25)] text-sm tracking-widest">Loading…</span>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-[rgba(255,255,255,0.08)]">
@@ -219,15 +364,14 @@ export default function AdminDashboard() {
                     style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)' }}
                   >
                     <td className="px-4 py-3">
-                      {p.img_url ? (
-                        <img src={p.img_url} alt={p.name} className="w-10 h-10 object-cover rounded" />
-                      ) : (
-                        <div className="w-10 h-10 bg-[rgba(255,255,255,0.05)] rounded flex items-center justify-center text-[rgba(255,255,255,0.2)] text-xs">?</div>
-                      )}
+                      {p.img_url
+                        ? <img src={p.img_url} alt={p.name} className="w-10 h-10 object-cover rounded" />
+                        : <div className="w-10 h-10 bg-[rgba(255,255,255,0.05)] rounded flex items-center justify-center text-[rgba(255,255,255,0.15)] text-xs">?</div>
+                      }
                     </td>
                     <td className="px-4 py-3">
                       <p className="text-white font-medium leading-tight">{p.name}</p>
-                      <p className="text-[rgba(255,255,255,0.35)] text-xs italic mt-0.5">{p.scientific_name}</p>
+                      <p className="text-[rgba(255,255,255,0.3)] text-xs italic mt-0.5">{p.scientific_name}</p>
                     </td>
                     <td className="px-4 py-3 text-white">${Number(p.price).toFixed(2)}</td>
                     <td className="px-3 py-3 text-center"><Flag on={p.indoor} /></td>
@@ -236,11 +380,10 @@ export default function AdminDashboard() {
                     <td className="px-3 py-3 text-center"><Flag on={p.air_purifying} /></td>
                     <td className="px-3 py-3 text-center"><Flag on={p.rare} /></td>
                     <td className="px-3 py-3 text-center">
-                      {p.discount > 0 ? (
-                        <span className="text-[#76974a] font-semibold">{p.discount}%</span>
-                      ) : (
-                        <span className="text-[rgba(255,255,255,0.2)]">—</span>
-                      )}
+                      {p.discount > 0
+                        ? <span className="text-[#76974a] font-semibold">{p.discount}%</span>
+                        : <span className="text-[rgba(255,255,255,0.18)]">—</span>
+                      }
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 justify-end">
@@ -251,7 +394,7 @@ export default function AdminDashboard() {
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(p.id)}
+                          onClick={() => handleDelete(p)}
                           disabled={deleting === p.id}
                           className="px-3 py-1.5 rounded text-xs border border-[rgba(220,60,60,0.3)] text-[rgba(220,100,100,0.8)] hover:text-[#f87171] hover:border-[rgba(220,60,60,0.6)] disabled:opacity-40 transition-colors"
                         >
@@ -274,6 +417,8 @@ export default function AdminDashboard() {
           onSaved={handleSaved}
         />
       )}
+
+      <ToastStack toasts={toasts} />
     </div>
   )
 }
