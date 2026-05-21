@@ -10,7 +10,7 @@ function CareDetail({ label, value }) {
   )
 }
 
-export default function ProductCard({ product, onAddToCart, isMobile }) {
+export default function ProductCard({ product, onAddToCart, isMobile, isFav = false, onToggleFavorite }) {
   const [flipped, setFlipped] = useState(false)
 
   if (isMobile) {
@@ -74,6 +74,19 @@ export default function ProductCard({ product, onAddToCart, isMobile }) {
   // Desktop bento card
   return (
     <div onClick={() => setFlipped(f => !f)} className="relative rounded-2xl overflow-hidden bg-gray-100 aspect-[3/4] group cursor-pointer transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/20">
+      {/* Heart button — top right, visible on hover */}
+      {onToggleFavorite && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+          aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+          className="absolute top-3 right-3 z-10 w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 cursor-pointer opacity-0 group-hover:opacity-100"
+          style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(6px)' }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill={isFav ? '#e05c6a' : 'none'} stroke={isFav ? '#e05c6a' : 'rgba(255,255,255,0.85)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </button>
+      )}
       <img
         src={product.img_url}
         alt={product.name}

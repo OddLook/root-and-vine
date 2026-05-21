@@ -27,7 +27,7 @@ const cardVariants = {
   exit: (dir) => ({ y: dir > 0 ? '-100%' : '100%', opacity: 0 }),
 }
 
-export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
+export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onToggleFavorite }) {
   const [filters, setFilters] = useState(EMPTY_FILTERS)
   const { products, loading } = useProducts(filters)
 
@@ -120,6 +120,82 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
           )}
         </AnimatePresence>
 
+        {/* Top overlay row: filter (left) · position (center) · heart (right) */}
+        <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between" style={{ pointerEvents: 'none' }}>
+
+          {/* Filter pill — left */}
+          <button
+            onClick={() => setIsFilterOpen(true)}
+            className="flex items-center gap-2 cursor-pointer"
+            style={{
+              pointerEvents: 'auto',
+              padding: '0.45rem 1rem',
+              borderRadius: '999px',
+              border: activeCount > 0 ? '1.5px solid #678649' : '1px solid rgba(255,255,255,0.3)',
+              background: activeCount > 0 ? 'rgba(103,134,73,0.18)' : 'rgba(255,255,255,0.12)',
+              backdropFilter: 'blur(8px)',
+              color: activeCount > 0 ? '#90b85e' : 'rgba(255,255,255,0.85)',
+              fontSize: '0.78rem',
+              fontWeight: 500,
+            }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
+            </svg>
+            Filter
+            {activeCount > 0 && (
+              <span style={{ background: '#678649', color: '#fff', borderRadius: '999px', fontSize: '0.65rem', fontWeight: 700, padding: '0.05rem 0.4rem' }}>
+                {activeCount}
+              </span>
+            )}
+          </button>
+
+          {/* Position indicator — center */}
+          {products.length > 0 && (
+            <span style={{
+              pointerEvents: 'none',
+              color: 'rgba(255,255,255,0.6)',
+              fontSize: '0.75rem',
+              fontWeight: 500,
+              letterSpacing: '0.05em',
+              background: 'rgba(0,0,0,0.35)',
+              backdropFilter: 'blur(6px)',
+              borderRadius: '999px',
+              padding: '0.3rem 0.75rem',
+            }}>
+              {currentIndex + 1} / {products.length}
+            </span>
+          )}
+
+          {/* Heart — right */}
+          <button
+            onClick={() => products.length > 0 && onToggleFavorite?.(products[currentIndex])}
+            aria-label="Toggle favorite"
+            style={{
+              pointerEvents: 'auto',
+              background: 'rgba(0,0,0,0.35)',
+              backdropFilter: 'blur(8px)',
+              border: 'none',
+              borderRadius: '999px',
+              width: '2.25rem',
+              height: '2.25rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+            }}
+          >
+            {(() => {
+              const isFav = products.length > 0 && favorites?.has(products[currentIndex].id)
+              return (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill={isFav ? '#e05c6a' : 'none'} stroke={isFav ? '#e05c6a' : 'rgba(255,255,255,0.85)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+              )
+            })()}
+          </button>
+        </div>
+
         {/* Prev / Next */}
         <div className="absolute right-4 z-30 flex flex-col gap-3" style={{ top: '50%', transform: 'translateY(-50%)' }}>
           <button onClick={goPrev} className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer" style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }} aria-label="Previous plant">
@@ -127,34 +203,6 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
           </button>
           <button onClick={goNext} className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer" style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }} aria-label="Next plant">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
-          </button>
-        </div>
-
-        {/* Filter button — bottom left */}
-        <div className="absolute left-4 z-30" style={{ bottom: '2.25rem' }}>
-          <button
-            onClick={() => setIsFilterOpen(true)}
-            className="flex items-center gap-2 cursor-pointer"
-            style={{
-              padding: '0.5rem 1.1rem',
-              borderRadius: '999px',
-              border: activeCount > 0 ? '1.5px solid #678649' : '1px solid rgba(255,255,255,0.3)',
-              background: activeCount > 0 ? 'rgba(103,134,73,0.18)' : 'rgba(255,255,255,0.12)',
-              backdropFilter: 'blur(8px)',
-              color: activeCount > 0 ? '#90b85e' : 'rgba(255,255,255,0.85)',
-              fontSize: '0.8rem',
-              fontWeight: 500,
-            }}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
-            </svg>
-            Filter
-            {activeCount > 0 && (
-              <span style={{ background: '#678649', color: '#fff', borderRadius: '999px', fontSize: '0.68rem', fontWeight: 700, padding: '0.05rem 0.45rem' }}>
-                {activeCount}
-              </span>
-            )}
           </button>
         </div>
 
@@ -305,7 +353,13 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen }) {
                     transition={{ duration: 0.55, delay: (i % 4) * 0.08, ease }}
                     style={{ paddingBottom: '1.5rem' }}
                   >
-                    <ProductCard product={product} onAddToCart={onAddToCart} isMobile={false} />
+                    <ProductCard
+                      product={product}
+                      onAddToCart={onAddToCart}
+                      isMobile={false}
+                      isFav={favorites?.has(product.id) ?? false}
+                      onToggleFavorite={() => onToggleFavorite?.(product)}
+                    />
                   </motion.div>
                 ))}
               </div>

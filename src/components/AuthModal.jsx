@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onSignIn, onSignUp }) {
+export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onSignIn, onSignUp, onResetPassword }) {
   const [mode, setMode]         = useState(initialMode)
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
@@ -35,6 +35,11 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
     setLoading(true)
     if (mode === 'signup') {
       const err = await onSignUp(email, password)
+      setLoading(false)
+      if (err) setError(err.message)
+      else setSuccess(true)
+    } else if (mode === 'forgot') {
+      const err = await onResetPassword(email)
       setLoading(false)
       if (err) setError(err.message)
       else setSuccess(true)
@@ -118,45 +123,68 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
               Root &amp; Vine
             </p>
 
-            {/* Tabs */}
-            <div style={{
-              display: 'flex',
-              marginBottom: isMobile ? '1.1rem' : '2rem',
-              background: 'rgba(255,255,255,0.07)',
-              borderRadius: '0.6rem',
-              padding: '3px',
-            }}>
-              {[['signin', 'Sign In'], ['signup', 'Create Account']].map(([key, label]) => (
+            {/* Tabs — hidden in forgot mode */}
+            {mode !== 'forgot' && (
+              <div style={{
+                display: 'flex',
+                marginBottom: isMobile ? '1.1rem' : '2rem',
+                background: 'rgba(255,255,255,0.07)',
+                borderRadius: '0.6rem',
+                padding: '3px',
+              }}>
+                {[['signin', 'Sign In'], ['signup', 'Create Account']].map(([key, label]) => (
+                  <button
+                    key={key}
+                    onClick={() => switchMode(key)}
+                    style={{
+                      flex: 1,
+                      padding: isMobile ? '0.4rem 0' : '0.55rem 0',
+                      borderRadius: '0.45rem',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: isMobile ? '0.8rem' : '0.875rem',
+                      fontWeight: 600,
+                      transition: 'all 0.18s ease',
+                      background: mode === key ? '#fff' : 'transparent',
+                      color: mode === key ? '#111' : 'rgba(255,255,255,0.55)',
+                    }}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Forgot header — back button + title */}
+            {mode === 'forgot' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: isMobile ? '1.25rem' : '1.75rem' }}>
                 <button
-                  key={key}
-                  onClick={() => switchMode(key)}
-                  style={{
-                    flex: 1,
-                    padding: isMobile ? '0.4rem 0' : '0.55rem 0',
-                    borderRadius: '0.45rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: isMobile ? '0.8rem' : '0.875rem',
-                    fontWeight: 600,
-                    transition: 'all 0.18s ease',
-                    background: mode === key ? '#fff' : 'transparent',
-                    color: mode === key ? '#111' : 'rgba(255,255,255,0.55)',
-                  }}
+                  onClick={() => switchMode('signin')}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', padding: '4px' }}
+                  aria-label="Back to sign in"
                 >
-                  {label}
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
                 </button>
-              ))}
-            </div>
+                <p style={{ fontWeight: 600, fontSize: isMobile ? '0.9rem' : '1rem', margin: 0 }}>Reset password</p>
+              </div>
+            )}
 
             {success ? (
               <div style={{ textAlign: 'center', padding: isMobile ? '0.75rem 0' : '1.5rem 0' }}>
-                <div style={{ fontSize: isMobile ? '1.5rem' : '2rem', marginBottom: '0.75rem' }}>🌱</div>
+                <div style={{ fontSize: isMobile ? '1.5rem' : '2rem', marginBottom: '0.75rem' }}>
+                  {mode === 'forgot' ? '📬' : '🌱'}
+                </div>
                 <p style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: isMobile ? '0.9rem' : '1rem' }}>
-                  Check your email
+                  {mode === 'forgot' ? 'Check your email' : 'Check your email'}
                 </p>
                 <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem', lineHeight: 1.55 }}>
-                  We sent a confirmation link to<br />
-                  <span style={{ color: '#fff' }}>{email}</span>
+                  {mode === 'forgot' ? (
+                    <>We sent a password reset link to<br /><span style={{ color: '#fff' }}>{email}</span></>
+                  ) : (
+                    <>We sent a confirmation link to<br /><span style={{ color: '#fff' }}>{email}</span></>
+                  )}
                 </p>
               </div>
             ) : (
@@ -173,16 +201,30 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
                   autoComplete="email"
                   style={inputStyle}
                 />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-                  style={inputStyle}
-                />
+
+                {mode !== 'forgot' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                      style={inputStyle}
+                    />
+                    {mode === 'signin' && (
+                      <button
+                        type="button"
+                        onClick={() => switchMode('forgot')}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: '0.78rem', textAlign: 'right', padding: '0 0.125rem' }}
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 {error && (
                   <p style={{ color: '#f87171', fontSize: '0.8rem', textAlign: 'center' }}>{error}</p>
@@ -205,7 +247,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
                     width: '100%',
                   }}
                 >
-                  {loading ? '…' : mode === 'signup' ? 'Create Account' : 'Sign In'}
+                  {loading ? '…' : mode === 'signup' ? 'Create Account' : mode === 'forgot' ? 'Send reset link' : 'Sign In'}
                 </button>
               </form>
             )}

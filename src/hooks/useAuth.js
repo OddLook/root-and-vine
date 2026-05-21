@@ -54,9 +54,12 @@ export function useAuth() {
     return () => { clearTimeout(timer); events.forEach(e => window.removeEventListener(e, reset)) }
   }, [user])
 
-  const signUp  = async (email, password) => (await supabase.auth.signUp({ email, password })).error
-  const signIn  = async (email, password) => (await supabase.auth.signInWithPassword({ email, password })).error
-  const signOut = async () => supabase.auth.signOut()
+  const signUp         = async (email, password) => (await supabase.auth.signUp({ email, password })).error
+  const signIn         = async (email, password) => (await supabase.auth.signInWithPassword({ email, password })).error
+  const signOut        = async () => supabase.auth.signOut()
+  const resetPassword  = async (email) => (await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  })).error
 
-  return { user, isAdmin, loading, adminReady, signUp, signIn, signOut }
+  return { user, isAdmin, loading, adminReady, signUp, signIn, signOut, resetPassword }
 }
