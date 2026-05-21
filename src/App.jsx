@@ -45,7 +45,7 @@ function MainLayout({ user, isAdmin, onCartOpen, onMenuOpen, onLoginOpen, onSign
 }
 
 export default function App() {
-  const { user, isAdmin, loading, signIn, signUp, signOut } = useAuth()
+  const { user, isAdmin, loading, adminReady, signIn, signUp, signOut } = useAuth()
   const { cart, addToCart, removeFromCart, isOpen: isCartOpen, openCart, closeCart } = useCart(user)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [authModal, setAuthModal] = useState({ open: false, mode: 'signin' })
@@ -68,7 +68,7 @@ export default function App() {
         />
       } />
       <Route path="/admin" element={
-        <AdminRoute user={user} isAdmin={isAdmin} loading={loading}>
+        <AdminRoute user={user} isAdmin={isAdmin} loading={loading} adminReady={adminReady}>
           <Suspense fallback={null}>
             <AdminDashboard />
           </Suspense>

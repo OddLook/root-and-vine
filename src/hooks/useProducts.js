@@ -18,11 +18,13 @@ export function useProducts({ pet_friendly, air_purifying, outdoor, rare, sale, 
     if (difficulty)    query = query.eq('difficulty', difficulty)
     query = query.order('created_at', { ascending: true })
 
-    query.then(({ data }) => {
-      setProducts(data ?? [])
-      setLoading(false)
-      isFirstLoad.current = false
-    })
+    query
+      .then(({ data }) => setProducts(data ?? []))
+      .catch(() => setProducts([]))
+      .finally(() => {
+        setLoading(false)
+        isFirstLoad.current = false
+      })
   }, [pet_friendly, air_purifying, outdoor, rare, sale, difficulty])
 
   return { products, loading }
