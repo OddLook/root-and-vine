@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onSignIn, onSignUp }) {
-  const [mode, setMode] = useState(initialMode)
-  const [email, setEmail] = useState('')
+  const [mode, setMode]         = useState(initialMode)
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [error, setError]       = useState(null)
+  const [success, setSuccess]   = useState(false)
+  const [loading, setLoading]   = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   useEffect(() => {
@@ -17,7 +17,6 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
     return () => mq.removeEventListener('change', handler)
   }, [])
 
-  // Sync mode and reset form whenever modal opens
   useEffect(() => {
     if (isOpen) {
       setMode(initialMode)
@@ -28,33 +27,22 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
     }
   }, [isOpen, initialMode])
 
-  function switchMode(next) {
-    setMode(next)
-    setError(null)
-    setSuccess(false)
-  }
+  function switchMode(next) { setMode(next); setError(null); setSuccess(false) }
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
     setLoading(true)
-
     if (mode === 'signup') {
       const err = await onSignUp(email, password)
       setLoading(false)
-      if (err) {
-        setError(err.message)
-      } else {
-        setSuccess(true)
-      }
+      if (err) setError(err.message)
+      else setSuccess(true)
     } else {
       const err = await onSignIn(email, password)
       setLoading(false)
-      if (err) {
-        setError(err.message)
-      } else {
-        onClose()
-      }
+      if (err) setError(err.message)
+      else onClose()
     }
   }
 
@@ -65,68 +53,65 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
     border: '1px solid rgba(255,255,255,0.15)',
     background: 'rgba(255,255,255,0.07)',
     color: '#fff',
-    fontSize: isMobile ? '0.9rem' : '0.95rem',
+    fontSize: '1rem', // ≥16px prevents iOS auto-zoom on focus
     outline: 'none',
+    boxSizing: 'border-box',
   }
-
-  const modalStyle = isMobile
-    ? {
-        maxWidth: '310px',
-        width: 'calc(100% - 2.5rem)',
-        padding: '1.75rem 1.5rem 1.5rem',
-        borderRadius: '1rem',
-      }
-    : {
-        maxWidth: '420px',
-        width: '100%',
-        padding: '2.5rem 2.25rem 2rem',
-        borderRadius: '1.25rem',
-      }
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          {/* Backdrop */}
-          <motion.div
-            key="backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={onClose}
-            style={{
-              position: 'fixed', inset: 0,
-              background: 'rgba(0,0,0,0.72)',
-              zIndex: 200,
-            }}
-          />
-
-          {/* Modal */}
+        /* Backdrop is the flex centering container.
+           Avoids top:50%+translate which goes off-screen when the
+           soft keyboard shrinks the mobile viewport. */
+        <motion.div
+          key="backdrop"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={onClose}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 200,
+            background: 'rgba(0,0,0,0.72)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: isMobile ? '1rem' : '1.5rem',
+            boxSizing: 'border-box',
+            overflowY: 'auto',
+          }}
+        >
           <motion.div
             key="modal"
-            initial={{ opacity: 0, scale: 0.95, y: 12 }}
+            initial={{ opacity: 0, scale: 0.96, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 12 }}
-            transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+            exit={{ opacity: 0, scale: 0.96, y: 10 }}
+            transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+            onClick={(e) => e.stopPropagation()}
             style={{
-              position: 'fixed',
-              top: '50%', left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: 201,
+              position: 'relative',
               background: '#111',
               border: '1px solid rgba(255,255,255,0.10)',
               color: '#fff',
-              ...modalStyle,
+              borderRadius: isMobile ? '0.875rem' : '1.25rem',
+              padding: isMobile ? '1.5rem 1.25rem 1.25rem' : '2.5rem 2.25rem 2rem',
+              width: '100%',
+              maxWidth: isMobile ? '340px' : '420px',
+              maxHeight: 'calc(100dvh - 2rem)',
+              overflowY: 'auto',
+              boxSizing: 'border-box',
+              flexShrink: 0,
             }}
-            onClick={(e) => e.stopPropagation()}
           >
             {/* Brand */}
             <p style={{
               fontFamily: 'var(--font-display, serif)',
-              fontSize: isMobile ? '1.05rem' : '1.2rem',
+              fontSize: isMobile ? '1rem' : '1.2rem',
               fontWeight: 700,
-              marginBottom: isMobile ? '1.25rem' : '1.75rem',
+              marginBottom: isMobile ? '1.1rem' : '1.75rem',
               textAlign: 'center',
               letterSpacing: '0.02em',
             }}>
@@ -136,7 +121,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
             {/* Tabs */}
             <div style={{
               display: 'flex',
-              marginBottom: isMobile ? '1.25rem' : '2rem',
+              marginBottom: isMobile ? '1.1rem' : '2rem',
               background: 'rgba(255,255,255,0.07)',
               borderRadius: '0.6rem',
               padding: '3px',
@@ -147,7 +132,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
                   onClick={() => switchMode(key)}
                   style={{
                     flex: 1,
-                    padding: isMobile ? '0.45rem 0' : '0.55rem 0',
+                    padding: isMobile ? '0.4rem 0' : '0.55rem 0',
                     borderRadius: '0.45rem',
                     border: 'none',
                     cursor: 'pointer',
@@ -164,22 +149,28 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
             </div>
 
             {success ? (
-              <div style={{ textAlign: 'center', padding: isMobile ? '1rem 0' : '1.5rem 0' }}>
-                <div style={{ fontSize: isMobile ? '1.6rem' : '2rem', marginBottom: '0.75rem' }}>🌱</div>
-                <p style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: isMobile ? '0.95rem' : '1rem' }}>Check your email</p>
-                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', lineHeight: 1.55 }}>
+              <div style={{ textAlign: 'center', padding: isMobile ? '0.75rem 0' : '1.5rem 0' }}>
+                <div style={{ fontSize: isMobile ? '1.5rem' : '2rem', marginBottom: '0.75rem' }}>🌱</div>
+                <p style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: isMobile ? '0.9rem' : '1rem' }}>
+                  Check your email
+                </p>
+                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.82rem', lineHeight: 1.55 }}>
                   We sent a confirmation link to<br />
                   <span style={{ color: '#fff' }}>{email}</span>
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '0.75rem' : '1rem' }}>
+              <form
+                onSubmit={handleSubmit}
+                style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '0.65rem' : '1rem' }}
+              >
                 <input
                   type="email"
                   placeholder="Email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  autoComplete="email"
                   style={inputStyle}
                 />
                 <input
@@ -189,27 +180,29 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
+                  autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
                   style={inputStyle}
                 />
 
                 {error && (
-                  <p style={{ color: '#f87171', fontSize: '0.82rem', textAlign: 'center' }}>{error}</p>
+                  <p style={{ color: '#f87171', fontSize: '0.8rem', textAlign: 'center' }}>{error}</p>
                 )}
 
                 <button
                   type="submit"
                   disabled={loading}
                   style={{
-                    marginTop: isMobile ? '0.25rem' : '0.5rem',
-                    padding: isMobile ? '0.75rem' : '1rem',
+                    marginTop: isMobile ? '0.15rem' : '0.5rem',
+                    padding: isMobile ? '0.7rem' : '1rem',
                     background: loading ? 'rgba(103,134,73,0.6)' : '#678649',
                     color: '#fff',
                     border: 'none',
                     borderRadius: '999px',
-                    fontSize: isMobile ? '0.9rem' : '1rem',
+                    fontSize: '1rem',
                     fontWeight: 600,
                     cursor: loading ? 'not-allowed' : 'pointer',
                     transition: 'background 0.2s ease',
+                    width: '100%',
                   }}
                 >
                   {loading ? '…' : mode === 'signup' ? 'Create Account' : 'Sign In'}
@@ -223,10 +216,14 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
               aria-label="Close"
               style={{
                 position: 'absolute',
-                top: isMobile ? '0.85rem' : '1.1rem',
-                right: isMobile ? '0.85rem' : '1.1rem',
-                background: 'none', border: 'none', cursor: 'pointer',
-                color: 'rgba(255,255,255,0.45)', padding: '4px',
+                top: isMobile ? '0.75rem' : '1.1rem',
+                right: isMobile ? '0.75rem' : '1.1rem',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: 'rgba(255,255,255,0.45)',
+                padding: '4px',
+                lineHeight: 0,
               }}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -234,7 +231,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
               </svg>
             </button>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   )
