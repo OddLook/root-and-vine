@@ -68,10 +68,18 @@ export function useCart(user) {
     }
   }
 
+  async function clearCart() {
+    setCart([])
+    if (user) {
+      await supabase.from('cart_items').delete().eq('user_id', user.id)
+    }
+  }
+
   return {
     cart,
     addToCart,
     removeFromCart,
+    clearCart,
     isOpen,
     openCart:  () => setIsOpen(true),
     closeCart: () => setIsOpen(false),

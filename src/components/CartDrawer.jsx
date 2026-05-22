@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function CartDrawer({ isOpen, onClose, cart, onRemove }) {
+export default function CartDrawer({ isOpen, onClose, cart, onRemove, onCheckout, checkoutLoading }) {
   const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0)
 
   return (
@@ -88,8 +88,16 @@ export default function CartDrawer({ isOpen, onClose, cart, onRemove }) {
                   <span className="text-sm text-white/50">Total</span>
                   <span className="font-display text-lg font-bold text-white">${total.toFixed(2)}</span>
                 </div>
-                <button className="w-full py-3.5 bg-[#678649] hover:bg-[#76974a] text-white font-semibold rounded-xl transition-colors cursor-pointer text-sm">
-                  Checkout
+                <button
+                  onClick={onCheckout}
+                  disabled={checkoutLoading}
+                  className="w-full py-3.5 text-white font-semibold rounded-xl transition-colors cursor-pointer text-sm"
+                  style={{
+                    background: checkoutLoading ? 'rgba(103,134,73,0.6)' : '#678649',
+                    cursor: checkoutLoading ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {checkoutLoading ? 'Redirecting…' : 'Checkout'}
                 </button>
               </div>
             )}
