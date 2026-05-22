@@ -73,6 +73,10 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
   if (isMobile) {
     const activeCount = Object.entries(filters).filter(([k, v]) => k !== 'difficulty' && v !== false && v !== null).length
 
+    // Clamp synchronously so products[displayIndex] is never undefined during a render
+    // where products just shrank but the useEffect hasn't corrected currentIndex yet.
+    const displayIndex = products.length > 0 ? Math.min(currentIndex, products.length - 1) : 0
+
     const goNext = () => {
       if (products.length === 0) return
       setDirection(1)
@@ -99,7 +103,7 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
         <AnimatePresence custom={direction} mode="wait">
           {products.length > 0 ? (
             <motion.div
-              key={products[currentIndex].id}
+              key={products[displayIndex].id}
               custom={direction}
               variants={cardVariants}
               initial="enter"
@@ -108,7 +112,7 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
               transition={{ duration: 0.38, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="absolute inset-0"
             >
-              <ProductCard product={products[currentIndex]} onAddToCart={onAddToCart} isMobile />
+              <ProductCard product={products[displayIndex]} onAddToCart={onAddToCart} isMobile />
             </motion.div>
           ) : (
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 flex flex-col items-center justify-center gap-4">
@@ -131,8 +135,8 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
               pointerEvents: 'auto',
               padding: '0.45rem 1rem',
               borderRadius: '999px',
-              border: activeCount > 0 ? '1.5px solid #678649' : '1px solid rgba(255,255,255,0.3)',
-              background: activeCount > 0 ? 'rgba(103,134,73,0.18)' : 'rgba(255,255,255,0.12)',
+              border: activeCount > 0 ? '1.5px solid #678649' : 'none',
+              background: activeCount > 0 ? 'rgba(103,134,73,0.22)' : 'rgba(0,0,0,0.35)',
               backdropFilter: 'blur(8px)',
               color: activeCount > 0 ? '#90b85e' : 'rgba(255,255,255,0.85)',
               fontSize: '0.78rem',
@@ -163,13 +167,13 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
               borderRadius: '999px',
               padding: '0.3rem 0.75rem',
             }}>
-              {currentIndex + 1} / {products.length}
+              {displayIndex + 1} / {products.length}
             </span>
           )}
 
           {/* Heart — right */}
           <button
-            onClick={() => products.length > 0 && onToggleFavorite?.(products[currentIndex])}
+            onClick={() => products.length > 0 && onToggleFavorite?.(products[displayIndex])}
             aria-label="Toggle favorite"
             style={{
               pointerEvents: 'auto',
@@ -186,7 +190,7 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
             }}
           >
             {(() => {
-              const isFav = products.length > 0 && favorites?.has(products[currentIndex].id)
+              const isFav = products.length > 0 && favorites?.has(products[displayIndex].id)
               return (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill={isFav ? '#e05c6a' : 'none'} stroke={isFav ? '#e05c6a' : 'rgba(255,255,255,0.85)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
