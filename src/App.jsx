@@ -64,6 +64,7 @@ export default function App() {
   const [isFavOpen, setIsFavOpen]           = useState(false)
   const [authModal, setAuthModal]           = useState({ open: false, mode: 'signin' })
   const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const [checkoutError, setCheckoutError]     = useState(null)
 
   function openAuth(mode) { setAuthModal({ open: true, mode }) }
   function closeAuth()    { setAuthModal({ open: false, mode: 'signin' }) }
@@ -71,14 +72,22 @@ export default function App() {
   async function handleCheckout() {
     if (!user) { openAuth('signin'); return }
     setCheckoutLoading(true)
+    setCheckoutError(null)
     try {
       const { data, error } = await supabase.functions.invoke('create-checkout', {
         body: { cart },
       })
-      if (error) throw error
+      if (error) {
+        // FunctionsHttpError carries the response body — extract the message
+        const msg = error.context
+          ? await error.context.json().then((j) => j.error).catch(() => error.message)
+          : error.message
+        throw new Error(msg)
+      }
       if (data?.url) window.location.href = data.url
     } catch (err) {
       console.error('Checkout error:', err)
+      setCheckoutError(err.message ?? 'Checkout failed. Please try again.')
     } finally {
       setCheckoutLoading(false)
     }
@@ -100,7 +109,7 @@ export default function App() {
           isFavOpen={isFavOpen} closeFav={() => setIsFavOpen(false)}
           favorites={favorites} favoritedProducts={favoritedProducts}
           onToggleFavorite={toggleFavorite}
-          onCheckout={handleCheckout} checkoutLoading={checkoutLoading}
+          onCheckout={handleCheckout} checkoutLoading={checkoutLoading} checkoutError={checkoutError}
         />
       } />
       <Route path="/reset-password" element={

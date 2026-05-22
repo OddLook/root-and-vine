@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function CartDrawer({ isOpen, onClose, cart, onRemove, onCheckout, checkoutLoading }) {
+export default function CartDrawer({ isOpen, onClose, cart, onRemove, onCheckout, checkoutLoading, checkoutError }) {
   const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0)
 
   return (
@@ -88,6 +88,11 @@ export default function CartDrawer({ isOpen, onClose, cart, onRemove, onCheckout
                   <span className="text-sm text-white/50">Total</span>
                   <span className="font-display text-lg font-bold text-white">${total.toFixed(2)}</span>
                 </div>
+                {checkoutError && (
+                  <p style={{ color: '#f87171', fontSize: '0.78rem', textAlign: 'center', lineHeight: 1.4 }}>
+                    {checkoutError}
+                  </p>
+                )}
                 <button
                   onClick={onCheckout}
                   disabled={checkoutLoading}
