@@ -7,7 +7,8 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
   const [password, setPassword] = useState('')
   const [error, setError]       = useState(null)
   const [success, setSuccess]   = useState(false)
-  const [loading, setLoading]   = useState(false)
+  const [loading, setLoading]       = useState(false)
+  const [demoLoading, setDemoLoading] = useState(false)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   useEffect(() => {
@@ -28,6 +29,15 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
   }, [isOpen, initialMode])
 
   function switchMode(next) { setMode(next); setError(null); setSuccess(false) }
+
+  async function handleDemo() {
+    setDemoLoading(true)
+    setError(null)
+    const err = await onSignIn('demo@rootandvine.com', 'Demo1234!')
+    setDemoLoading(false)
+    if (err) setError(err.message)
+    else onClose()
+  }
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -250,6 +260,36 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
                   {loading ? '…' : mode === 'signup' ? 'Create Account' : mode === 'forgot' ? 'Send reset link' : 'Sign In'}
                 </button>
               </form>
+            )}
+
+            {/* Demo button — only in signin/signup, not forgot */}
+            {mode !== 'forgot' && !success && (
+              <div style={{ marginTop: isMobile ? '0.75rem' : '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: isMobile ? '0.75rem' : '1rem' }}>
+                  <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                  <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.75rem' }}>o</span>
+                  <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleDemo}
+                  disabled={demoLoading || loading}
+                  style={{
+                    width: '100%',
+                    padding: isMobile ? '0.7rem' : '0.875rem',
+                    background: 'rgba(255,255,255,0.07)',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    color: demoLoading ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.85)',
+                    borderRadius: '999px',
+                    fontSize: '0.9rem',
+                    fontWeight: 600,
+                    cursor: demoLoading ? 'not-allowed' : 'pointer',
+                    transition: 'background 0.2s',
+                  }}
+                >
+                  {demoLoading ? '…' : 'Ver demo'}
+                </button>
+              </div>
             )}
 
             {/* Close */}
