@@ -298,7 +298,7 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
       <Hero onSignUpOpen={onSignUpOpen} />
 
       <section id="shop" style={{ background: '#f5f2ed', paddingTop: '6rem', paddingBottom: '6rem' }}>
-        <div style={{ paddingLeft: '5rem', paddingRight: '5rem' }}>
+        <div style={{ paddingLeft: 'clamp(1.25rem, 5vw, 5rem)', paddingRight: 'clamp(1.25rem, 5vw, 5rem)' }}>
 
           {/* Section header */}
           <motion.div

@@ -29,7 +29,7 @@ export default function Hero({ onSignUpOpen }) {
       <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/60 to-transparent" />
 
       {/* Content */}
-      <div className="relative z-10 w-full py-28 md:py-36" style={{ paddingLeft: '5rem', paddingRight: '5rem' }}>
+      <div className="relative z-10 w-full py-28 md:py-36" style={{ paddingLeft: 'clamp(1.25rem, 5vw, 5rem)', paddingRight: 'clamp(1.25rem, 5vw, 5rem)' }}>
         <div className="flex flex-col gap-6 max-w-lg">
 
           <motion.span {...fadeUp(0.1)} className="text-[#76974a] text-sm font-semibold tracking-[0.25em] uppercase">

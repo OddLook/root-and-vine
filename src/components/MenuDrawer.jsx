@@ -23,7 +23,7 @@ export default function MenuDrawer({ isOpen, onClose }) {
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className="fixed left-0 top-0 h-full z-50 flex flex-col shadow-2xl"
-            style={{ width: '368px', backgroundColor: '#000' }}
+            style={{ width: 'min(368px, 85vw)', backgroundColor: '#000' }}
           >
             {/* Header */}
             <div

@@ -7,7 +7,7 @@ const links = {
 export default function Footer() {
   return (
     <footer className="bg-black text-white">
-      <div style={{ paddingLeft: '5rem', paddingRight: '5rem', paddingTop: '4.8rem', paddingBottom: '4.8rem' }}>
+      <div style={{ paddingLeft: 'clamp(1.25rem, 5vw, 5rem)', paddingRight: 'clamp(1.25rem, 5vw, 5rem)', paddingTop: '4.8rem', paddingBottom: '4.8rem' }}>
         <div className="grid grid-cols-4 gap-12 border-b border-white/10" style={{ paddingBottom: '4rem' }}>
           {/* Brand */}
           <div className="flex flex-col gap-5">

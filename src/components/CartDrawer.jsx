@@ -22,7 +22,7 @@ export default function CartDrawer({ isOpen, onClose, cart, onRemove, onCheckout
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className="fixed right-0 top-0 h-full z-50 flex flex-col shadow-2xl"
-            style={{ width: '368px', backgroundColor: '#000' }}
+            style={{ width: 'min(368px, 85vw)', backgroundColor: '#000' }}
           >
             <div
               className="flex items-center justify-center border-b border-white/10"
