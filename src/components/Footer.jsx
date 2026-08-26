@@ -60,6 +60,17 @@ export default function Footer() {
             <a href="#" className="hover:text-white/60 transition-colors cursor-pointer">Shipping Info</a>
           </div>
         </div>
+
+        <div className="text-center text-white/25 text-xs" style={{ marginTop: '1.25rem' }}>
+          <a
+            href="https://musubi-catalogue.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white/50 transition-colors cursor-pointer"
+          >
+            Design &amp; development — Musubi Studio
+          </a>
+        </div>
       </div>
     </footer>
   )
