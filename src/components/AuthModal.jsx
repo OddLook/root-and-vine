@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronLeft, X } from 'lucide-react'
 
 export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onSignIn, onSignUp, onResetPassword }) {
   const [mode, setMode]         = useState(initialMode)
@@ -173,9 +174,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
                   style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', padding: '4px' }}
                   aria-label="Back to sign in"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="15 18 9 12 15 6" />
-                  </svg>
+                  <ChevronLeft size={18} strokeWidth={2.5} />
                 </button>
                 <p style={{ fontWeight: 600, fontSize: isMobile ? '0.9rem' : '1rem', margin: 0 }}>Reset password</p>
               </div>
@@ -246,7 +245,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
                   style={{
                     marginTop: isMobile ? '0.15rem' : '0.5rem',
                     padding: isMobile ? '0.7rem' : '1rem',
-                    background: loading ? 'rgba(103,134,73,0.6)' : '#678649',
+                    background: loading ? 'rgba(92,141,63,0.6)' : '#5c8d3f',
                     color: '#fff',
                     border: 'none',
                     borderRadius: '999px',
@@ -287,7 +286,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
                     transition: 'background 0.2s',
                   }}
                 >
-                  {demoLoading ? '…' : 'Ver demo'}
+                  {demoLoading ? '…' : 'View demo'}
                 </button>
               </div>
             )}
@@ -308,9 +307,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin', onS
                 lineHeight: 0,
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <X size={16} strokeWidth={2} />
             </button>
           </motion.div>
         </motion.div>

@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
+import { MorphIcon } from 'morphicons/react'
+import { Pencil, Trash2, Check } from 'lucide'
+import { ImageOff, ArrowLeft, Plus, Save, X, Wrench } from 'lucide-react'
 
 const BUCKET = 'product-images'
 
@@ -29,7 +32,7 @@ function ToastStack({ toasts }) {
         <div
           key={t.id}
           className="px-4 py-3 rounded-lg text-sm font-medium shadow-xl text-white text-center"
-          style={{ background: t.type === 'error' ? '#dc2626' : '#76974a' }}
+          style={{ background: t.type === 'error' ? '#dc2626' : '#72a744' }}
         >
           {t.message}
         </div>
@@ -100,32 +103,38 @@ function ProductModal({ product, onClose, onSaved }) {
     }
   }
 
-  const inputCls = "bg-[#1a1a1a] border border-[rgba(255,255,255,0.12)] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#76974a]"
+  const inputCls = "bg-[#1a1a1a] border border-[rgba(255,255,255,0.12)] rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-[#72a744]"
   const labelCls = "flex flex-col gap-1 text-sm"
   const capCls   = "text-[rgba(255,255,255,0.45)] text-xs uppercase tracking-wider"
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.85)' }}>
-      <div className="bg-[#111] rounded-xl w-full max-w-2xl mx-4 max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.85)' }}>
+      <div className="bg-[#111] rounded-xl border border-[#72a744]/20 w-full max-w-2xl max-h-[92vh] overflow-y-auto">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(255,255,255,0.08)] sticky top-0 bg-[#111] z-10">
-          <h2 className="text-white font-semibold">{product?.id ? 'Edit Product' : 'New Product'}</h2>
-          <button onClick={onClose} className="text-[rgba(255,255,255,0.4)] hover:text-white text-2xl leading-none">&times;</button>
+        <div className="flex items-center justify-between px-7 py-5 border-b border-[#72a744]/20 sticky top-0 bg-[#111] z-10">
+          <h2 className="text-white font-semibold text-lg">{product?.id ? 'Edit Product' : 'New Product'}</h2>
+          <button
+            onClick={onClose}
+            className="w-9 h-9 flex items-center justify-center rounded-full text-[rgba(255,255,255,0.5)] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            aria-label="Close"
+          >
+            <X size={18} strokeWidth={2.5} />
+          </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="px-7 py-6 flex flex-col gap-6">
 
           {/* Image section */}
           <div className="flex gap-4 items-start">
             <div
-              className="w-24 h-24 rounded-lg border border-[rgba(255,255,255,0.12)] bg-[#1a1a1a] flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer hover:border-[#76974a] transition-colors"
+              className="w-24 h-24 rounded-lg border border-[rgba(255,255,255,0.12)] bg-[#1a1a1a] flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer hover:border-[#72a744] transition-colors"
               onClick={() => fileRef.current.click()}
               title="Click to upload image"
             >
               {preview
                 ? <img src={preview} alt="preview" className="w-full h-full object-cover" />
-                : <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" strokeLinecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                : <ImageOff size={24} strokeWidth={1.5} color="rgba(255,255,255,0.2)" />
               }
             </div>
             <div className="flex-1 flex flex-col gap-2">
@@ -139,7 +148,7 @@ function ProductModal({ product, onClose, onSaved }) {
               <button
                 type="button"
                 onClick={() => fileRef.current.click()}
-                className="w-full px-3 py-2 rounded border border-[rgba(255,255,255,0.15)] text-[rgba(255,255,255,0.6)] hover:text-white hover:border-[#76974a] text-sm transition-colors text-left"
+                className="w-full px-3 py-2 rounded border border-[rgba(255,255,255,0.15)] text-[rgba(255,255,255,0.6)] hover:text-white hover:border-[#72a744] text-sm transition-colors text-left"
               >
                 {file ? file.name : 'Upload image…'}
               </button>
@@ -211,7 +220,7 @@ function ProductModal({ product, onClose, onSaved }) {
           </label>
 
           {/* Boolean flags */}
-          <div className="flex flex-wrap gap-5 pt-1">
+          <div className="flex flex-wrap gap-5">
             {[
               ['indoor',       'Indoor'],
               ['outdoor',      'Outdoor'],
@@ -224,7 +233,7 @@ function ProductModal({ product, onClose, onSaved }) {
                   type="checkbox"
                   checked={!!form[key]}
                   onChange={e => set(key, e.target.checked)}
-                  className="accent-[#76974a] w-4 h-4"
+                  className="accent-[#72a744] w-4 h-4"
                 />
                 <span className="text-white">{label}</span>
               </label>
@@ -233,20 +242,24 @@ function ProductModal({ product, onClose, onSaved }) {
 
           {error && <p className="text-red-400 text-sm">{error}</p>}
 
-          <div className="flex justify-end gap-3 pt-2 border-t border-[rgba(255,255,255,0.06)] mt-1">
+          <div className="flex justify-end items-center gap-3 pt-5 border-t border-[rgba(255,255,255,0.08)]">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded text-sm text-[rgba(255,255,255,0.6)] hover:text-white border border-[rgba(255,255,255,0.12)] hover:border-[rgba(255,255,255,0.3)] transition-colors"
+              aria-label="Cancel"
+              title="Cancel"
+              className="w-11 h-11 flex items-center justify-center rounded-full text-[rgba(255,255,255,0.6)] hover:text-white border border-[rgba(255,255,255,0.15)] hover:border-[rgba(255,255,255,0.35)] transition-colors cursor-pointer"
             >
-              Cancel
+              <X size={18} strokeWidth={2.5} />
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2 rounded text-sm bg-[#76974a] text-white hover:bg-[#678649] disabled:opacity-50 transition-colors"
+              aria-label={product?.id ? 'Save changes' : 'Add product'}
+              title={saving ? 'Saving…' : (product?.id ? 'Save changes' : 'Add product')}
+              className="w-11 h-11 flex items-center justify-center rounded-full bg-[#5c8d3f] text-white hover:bg-[#72a744] disabled:opacity-50 transition-colors cursor-pointer"
             >
-              {saving ? 'Saving…' : (product?.id ? 'Save Changes' : 'Add Product')}
+              <Save size={18} strokeWidth={2.5} />
             </button>
           </div>
         </form>
@@ -257,7 +270,7 @@ function ProductModal({ product, onClose, onSaved }) {
 
 // ── Helpers ───────────────────────────────────────────────────────
 const Flag = ({ on }) => (
-  <span style={{ color: on ? '#76974a' : 'rgba(255,255,255,0.18)', fontSize: '0.85rem' }}>
+  <span style={{ color: on ? '#72a744' : 'rgba(255,255,255,0.18)', fontSize: '0.85rem' }}>
     {on ? '✓' : '—'}
   </span>
 )
@@ -268,6 +281,7 @@ export default function AdminDashboard() {
   const [loading, setLoading]   = useState(true)
   const [modal, setModal]       = useState(null)   // null | { product }
   const [deleting, setDeleting] = useState(null)
+  const [feedback, setFeedback] = useState({ id: null, type: null }) // transient edit/delete click feedback
   const { toasts, show }        = useToast()
 
   async function load() {
@@ -279,17 +293,29 @@ export default function AdminDashboard() {
 
   useEffect(() => { load() }, [])
 
+  function handleEditClick(product) {
+    setFeedback({ id: product.id, type: 'edit' })
+    setModal({ product })
+    setTimeout(() => setFeedback({ id: null, type: null }), 700)
+  }
+
   async function handleDelete(product) {
     if (!window.confirm(`Delete "${product.name}"? This cannot be undone.`)) return
     setDeleting(product.id)
+    setFeedback({ id: product.id, type: 'delete' })
     const { error } = await supabase.from('products').delete().eq('id', product.id)
-    setDeleting(null)
     if (error) {
+      setDeleting(null)
+      setFeedback({ id: null, type: null })
       show('Failed to delete product', 'error')
       return
     }
-    setProducts(ps => ps.filter(p => p.id !== product.id))
-    show(`"${product.name}" deleted`)
+    setTimeout(() => {
+      setProducts(ps => ps.filter(p => p.id !== product.id))
+      setDeleting(null)
+      setFeedback({ id: null, type: null })
+      show(`"${product.name}" deleted`)
+    }, 500)
   }
 
   function handleSaved(savedProduct, action) {
@@ -306,33 +332,48 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-[#0a0a0a] text-white">
 
       {/* Header */}
-      <header className="bg-black border-b border-[rgba(255,255,255,0.08)] flex items-center justify-between px-6 py-4">
+      <header
+        className="bg-black border-b border-[#72a744]/20 flex items-center justify-between"
+        style={{
+          paddingLeft: 'clamp(1.25rem, 5vw, 5rem)',
+          paddingRight: 'clamp(1.25rem, 5vw, 5rem)',
+          paddingTop: '1.1rem',
+          paddingBottom: '1.1rem',
+        }}
+      >
         <div className="flex items-center gap-4">
           <Link
             to="/"
             className="text-[rgba(255,255,255,0.45)] hover:text-white text-sm flex items-center gap-1.5 transition-colors"
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M19 12H5M12 5l-7 7 7 7" />
-            </svg>
+            <ArrowLeft size={14} strokeWidth={2} />
             Back to Store
           </Link>
           <span className="text-[rgba(255,255,255,0.15)]">/</span>
-          <span className="font-semibold text-[#76974a]">Admin Dashboard</span>
+          <span className="flex items-center gap-2 font-semibold text-[#72a744] text-base">
+            <Wrench size={17} strokeWidth={2} />
+            Admin Dashboard
+          </span>
         </div>
         <button
           onClick={() => setModal({ product: null })}
-          className="flex items-center gap-2 px-4 py-2 bg-[#76974a] hover:bg-[#678649] text-white text-sm rounded transition-colors"
+          aria-label="Add product"
+          title="Add product"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-[#5c8d3f] hover:bg-[#72a744] text-white transition-colors cursor-pointer"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M12 5v14M5 12h14" />
-          </svg>
-          Add Product
+          <Plus size={18} strokeWidth={2.5} />
         </button>
       </header>
 
       {/* Content */}
-      <div className="px-6 py-6">
+      <div
+        style={{
+          paddingLeft: 'clamp(1.25rem, 5vw, 5rem)',
+          paddingRight: 'clamp(1.25rem, 5vw, 5rem)',
+          paddingTop: '2rem',
+          paddingBottom: '2rem',
+        }}
+      >
         <p className="text-[rgba(255,255,255,0.35)] text-sm mb-4">{products.length} products</p>
 
         {loading ? (
@@ -340,7 +381,7 @@ export default function AdminDashboard() {
             <span className="text-[rgba(255,255,255,0.25)] text-sm tracking-widest">Loading…</span>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-[rgba(255,255,255,0.08)]">
+          <div className="overflow-x-auto rounded-xl border border-[#72a744]/20">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.4)] text-xs uppercase tracking-wider">
@@ -381,24 +422,38 @@ export default function AdminDashboard() {
                     <td className="px-3 py-3 text-center"><Flag on={p.rare} /></td>
                     <td className="px-3 py-3 text-center">
                       {p.discount > 0
-                        ? <span className="text-[#76974a] font-semibold">{p.discount}%</span>
+                        ? <span className="text-[#72a744] font-semibold">{p.discount}%</span>
                         : <span className="text-[rgba(255,255,255,0.18)]">—</span>
                       }
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2 justify-end">
                         <button
-                          onClick={() => setModal({ product: p })}
-                          className="px-3 py-1.5 rounded text-xs border border-[rgba(255,255,255,0.15)] text-[rgba(255,255,255,0.7)] hover:text-white hover:border-[rgba(255,255,255,0.4)] transition-colors"
+                          onClick={() => handleEditClick(p)}
+                          aria-label={`Edit ${p.name}`}
+                          title="Edit"
+                          className="w-8 h-8 flex items-center justify-center rounded-full border border-[rgba(255,255,255,0.15)] text-[rgba(255,255,255,0.7)] hover:text-white hover:border-[rgba(255,255,255,0.4)] transition-colors cursor-pointer"
                         >
-                          Edit
+                          <MorphIcon
+                            icon={feedback.id === p.id && feedback.type === 'edit' ? Check : Pencil}
+                            spring="smooth"
+                            size={14}
+                            strokeWidth={2.5}
+                          />
                         </button>
                         <button
                           onClick={() => handleDelete(p)}
                           disabled={deleting === p.id}
-                          className="px-3 py-1.5 rounded text-xs border border-[rgba(220,60,60,0.3)] text-[rgba(220,100,100,0.8)] hover:text-[#f87171] hover:border-[rgba(220,60,60,0.6)] disabled:opacity-40 transition-colors"
+                          aria-label={`Delete ${p.name}`}
+                          title="Delete"
+                          className="w-8 h-8 flex items-center justify-center rounded-full border border-[rgba(220,60,60,0.3)] text-[rgba(220,100,100,0.8)] hover:text-[#f87171] hover:border-[rgba(220,60,60,0.6)] disabled:opacity-40 transition-colors cursor-pointer"
                         >
-                          {deleting === p.id ? '…' : 'Delete'}
+                          <MorphIcon
+                            icon={feedback.id === p.id && feedback.type === 'delete' ? Check : Trash2}
+                            spring="smooth"
+                            size={14}
+                            strokeWidth={2.5}
+                          />
                         </button>
                       </div>
                     </td>

@@ -62,7 +62,7 @@ export default function ResetPassword() {
             </p>
             <Link
               to="/"
-              style={{ display: 'inline-block', padding: '0.75rem 2rem', background: '#678649', color: '#fff', borderRadius: '999px', fontSize: '0.95rem', fontWeight: 600, textDecoration: 'none' }}
+              style={{ display: 'inline-block', padding: '0.75rem 2rem', background: '#5c8d3f', color: '#fff', borderRadius: '999px', fontSize: '0.95rem', fontWeight: 600, textDecoration: 'none' }}
             >
               Go to shop
             </Link>
@@ -74,7 +74,7 @@ export default function ResetPassword() {
             </p>
             <Link
               to="/"
-              style={{ color: '#678649', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 }}
+              style={{ color: '#5c8d3f', fontSize: '0.875rem', textDecoration: 'none', fontWeight: 600 }}
             >
               ← Back to shop
             </Link>
@@ -115,7 +115,7 @@ export default function ResetPassword() {
               <button
                 type="submit"
                 disabled={loading}
-                style={{ marginTop: '0.25rem', padding: '0.875rem', background: loading ? 'rgba(103,134,73,0.6)' : '#678649', color: '#fff', border: 'none', borderRadius: '999px', fontSize: '1rem', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.2s ease', width: '100%' }}
+                style={{ marginTop: '0.25rem', padding: '0.875rem', background: loading ? 'rgba(92,141,63,0.6)' : '#5c8d3f', color: '#fff', border: 'none', borderRadius: '999px', fontSize: '1rem', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', transition: 'background 0.2s ease', width: '100%' }}
               >
                 {loading ? '…' : 'Update password'}
               </button>

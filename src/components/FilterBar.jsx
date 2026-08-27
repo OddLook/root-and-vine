@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { SlidersHorizontal, ChevronDown } from 'lucide-react'
 
 const FILTERS = [
   { key: 'indoor',       label: 'Indoor' },
@@ -37,9 +38,9 @@ function SaleChip({ active, onClick }) {
       style={{
         padding: '0.4rem 1.1rem',
         borderRadius: '999px',
-        border: '1.5px solid #678649',
-        background: active ? '#678649' : 'transparent',
-        color: active ? '#fff' : '#678649',
+        border: '1.5px solid #5c8d3f',
+        background: active ? '#5c8d3f' : 'transparent',
+        color: active ? '#fff' : '#5c8d3f',
         fontSize: '0.8rem',
         fontWeight: 600,
       }}
@@ -79,15 +80,11 @@ export default function FilterBar({ filters, onToggle, onClear, total }) {
             fontWeight: 500,
           }}
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="4" y1="6" x2="20" y2="6" />
-            <line x1="8" y1="12" x2="16" y2="12" />
-            <line x1="11" y1="18" x2="13" y2="18" />
-          </svg>
+          <SlidersHorizontal size={13} strokeWidth={2.5} />
           Filter
           {hasActive && (
             <span style={{
-              background: '#678649',
+              background: '#5c8d3f',
               color: '#fff',
               borderRadius: '999px',
               fontSize: '0.68rem',
@@ -103,9 +100,7 @@ export default function FilterBar({ filters, onToggle, onClear, total }) {
             transition={{ duration: 0.2 }}
             style={{ display: 'flex', alignItems: 'center' }}
           >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
+            <ChevronDown size={11} strokeWidth={2.5} />
           </motion.span>
         </button>
 
@@ -114,7 +109,7 @@ export default function FilterBar({ filters, onToggle, onClear, total }) {
           <button
             onClick={onClear}
             className="cursor-pointer hover:opacity-60 transition-opacity"
-            style={{ background: 'none', border: 'none', color: '#678649', fontSize: '0.78rem', fontWeight: 600, padding: 0 }}
+            style={{ background: 'none', border: 'none', color: '#5c8d3f', fontSize: '0.78rem', fontWeight: 600, padding: 0 }}
           >
             Clear ×
           </button>
@@ -150,7 +145,7 @@ export default function FilterBar({ filters, onToggle, onClear, total }) {
                 <button
                   onClick={onClear}
                   className="cursor-pointer hover:opacity-60 transition-opacity"
-                  style={{ background: 'none', border: 'none', color: '#678649', fontSize: '0.8rem', fontWeight: 600, padding: '0.4rem 0.5rem' }}
+                  style={{ background: 'none', border: 'none', color: '#5c8d3f', fontSize: '0.8rem', fontWeight: 600, padding: '0.4rem 0.5rem' }}
                 >
                   Clear ×
                 </button>

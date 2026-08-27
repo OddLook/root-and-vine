@@ -5,6 +5,9 @@ import Hero from './Hero'
 import Footer from './Footer'
 import FilterBar from './FilterBar'
 import { useProducts } from '../hooks/useProducts'
+import { MorphIcon } from 'morphicons/react'
+import { Heart, Check } from 'lucide'
+import { SlidersHorizontal, ChevronUp, ChevronDown } from 'lucide-react'
 
 const ease = [0.25, 0.46, 0.45, 0.94]
 
@@ -36,6 +39,7 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
   const [currentIndex, setCurrentIndex] = useState(0)
   const [direction, setDirection] = useState(1)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [justFaved, setJustFaved] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)')
@@ -117,7 +121,7 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
           ) : (
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 flex flex-col items-center justify-center gap-4">
               <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.95rem' }}>No plants match your filters</p>
-              <button onClick={clearFilters} style={{ color: '#678649', background: 'none', border: '1px solid #678649', borderRadius: '999px', padding: '0.5rem 1.5rem', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
+              <button onClick={clearFilters} style={{ color: '#5c8d3f', background: 'none', border: '1px solid #5c8d3f', borderRadius: '999px', padding: '0.5rem 1.5rem', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}>
                 Clear filters
               </button>
             </motion.div>
@@ -135,20 +139,18 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
               pointerEvents: 'auto',
               padding: '0.45rem 1rem',
               borderRadius: '999px',
-              border: activeCount > 0 ? '1.5px solid #678649' : 'none',
-              background: activeCount > 0 ? 'rgba(103,134,73,0.22)' : 'rgba(0,0,0,0.35)',
+              border: activeCount > 0 ? '1.5px solid #5c8d3f' : 'none',
+              background: activeCount > 0 ? 'rgba(92,141,63,0.22)' : 'rgba(0,0,0,0.35)',
               backdropFilter: 'blur(8px)',
-              color: activeCount > 0 ? '#90b85e' : 'rgba(255,255,255,0.85)',
+              color: activeCount > 0 ? '#72a744' : 'rgba(255,255,255,0.85)',
               fontSize: '0.78rem',
               fontWeight: 500,
             }}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-              <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
-            </svg>
+            <SlidersHorizontal size={12} strokeWidth={2.5} />
             Filter
             {activeCount > 0 && (
-              <span style={{ background: '#678649', color: '#fff', borderRadius: '999px', fontSize: '0.65rem', fontWeight: 700, padding: '0.05rem 0.4rem' }}>
+              <span style={{ background: '#5c8d3f', color: '#fff', borderRadius: '999px', fontSize: '0.65rem', fontWeight: 700, padding: '0.05rem 0.4rem' }}>
                 {activeCount}
               </span>
             )}
@@ -173,7 +175,12 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
 
           {/* Heart — right */}
           <button
-            onClick={() => products.length > 0 && onToggleFavorite?.(products[displayIndex])}
+            onClick={() => {
+              if (products.length === 0) return
+              onToggleFavorite?.(products[displayIndex])
+              setJustFaved(true)
+              setTimeout(() => setJustFaved(false), 1000)
+            }}
             aria-label="Toggle favorite"
             style={{
               pointerEvents: 'auto',
@@ -192,9 +199,14 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
             {(() => {
               const isFav = products.length > 0 && favorites?.has(products[displayIndex].id)
               return (
-                <svg width="18" height="18" viewBox="0 0 24 24" fill={isFav ? '#e05c6a' : 'none'} stroke={isFav ? '#e05c6a' : 'rgba(255,255,255,0.85)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                </svg>
+                <MorphIcon
+                  icon={justFaved ? Check : Heart}
+                  spring="smooth"
+                  size={18}
+                  strokeWidth={2.5}
+                  color={justFaved ? '#e05c6a' : (isFav ? '#e05c6a' : 'rgba(255,255,255,0.85)')}
+                  fill={!justFaved && isFav ? '#e05c6a' : 'none'}
+                />
               )
             })()}
           </button>
@@ -203,10 +215,10 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
         {/* Prev / Next */}
         <div className="absolute right-4 z-30 flex flex-col gap-3" style={{ top: '50%', transform: 'translateY(-50%)' }}>
           <button onClick={goPrev} className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer" style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }} aria-label="Previous plant">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15" /></svg>
+            <ChevronUp size={20} strokeWidth={2.5} color="white" />
           </button>
           <button onClick={goNext} className="w-12 h-12 rounded-full flex items-center justify-center cursor-pointer" style={{ backgroundColor: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)' }} aria-label="Next plant">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+            <ChevronDown size={20} strokeWidth={2.5} color="white" />
           </button>
         </div>
 
@@ -247,13 +259,13 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
                           padding: '0.55rem 1.15rem',
                           borderRadius: '999px',
                           border: isSale
-                            ? `1.5px solid ${active ? '#678649' : '#678649'}`
+                            ? `1.5px solid ${active ? '#5c8d3f' : '#5c8d3f'}`
                             : `1px solid ${active ? '#fff' : 'rgba(255,255,255,0.2)'}`,
                           background: isSale
-                            ? (active ? '#678649' : 'transparent')
+                            ? (active ? '#5c8d3f' : 'transparent')
                             : (active ? '#fff' : 'transparent'),
                           color: isSale
-                            ? (active ? '#fff' : '#90b85e')
+                            ? (active ? '#fff' : '#72a744')
                             : (active ? '#111' : 'rgba(255,255,255,0.7)'),
                           fontSize: '0.85rem',
                           fontWeight: active ? 600 : 400,
@@ -278,7 +290,7 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
                   )}
                   <button
                     onClick={() => setIsFilterOpen(false)}
-                    style={{ flex: 2, padding: '0.875rem', borderRadius: '999px', background: '#678649', border: 'none', color: '#fff', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
+                    style={{ flex: 2, padding: '0.875rem', borderRadius: '999px', background: '#5c8d3f', border: 'none', color: '#fff', fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer' }}
                   >
                     {activeCount > 0 ? `Show ${products.length} plant${products.length === 1 ? '' : 's'}` : 'Done'}
                   </button>
@@ -308,10 +320,10 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
             transition={{ duration: 0.6, ease }}
             style={{ marginBottom: '2rem' }}
           >
-            <p className="text-[#76974a] text-xs font-semibold tracking-[0.25em] uppercase mb-3">
+            <p className="text-[#72a744] text-xs font-semibold tracking-[0.25em] uppercase mb-3">
               Our Collection
             </p>
-            <h2 className="font-display text-4xl font-bold text-black leading-tight">Hand-picked plants</h2>
+            <h2 className="font-sans text-4xl font-bold text-black leading-tight">Hand-picked plants</h2>
           </motion.div>
 
           {/* Filter bar */}
@@ -333,8 +345,8 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
                 className="cursor-pointer hover:opacity-75 transition-opacity"
                 style={{
                   background: 'none',
-                  border: '1px solid #678649',
-                  color: '#678649',
+                  border: '1px solid #5c8d3f',
+                  color: '#5c8d3f',
                   borderRadius: '999px',
                   padding: '0.6rem 1.75rem',
                   fontSize: '0.85rem',
@@ -379,7 +391,7 @@ export default function ProductFeed({ onAddToCart, onSignUpOpen, favorites, onTo
                 {visibleCount < products.length ? (
                   <button
                     onClick={() => setVisibleCount(c => Math.min(c + ITEMS_PER_ROW, products.length))}
-                    className="border border-[#678649] text-[#678649] hover:bg-[#678649] hover:text-white transition-colors font-semibold rounded-full cursor-pointer"
+                    className="border border-[#5c8d3f] text-[#5c8d3f] hover:bg-[#5c8d3f] hover:text-white transition-colors font-semibold rounded-full cursor-pointer"
                     style={{ paddingLeft: '2.5rem', paddingRight: '2.5rem', paddingTop: '0.875rem', paddingBottom: '0.875rem', fontSize: '0.9rem' }}
                   >
                     See More

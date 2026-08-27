@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom'
+import { MorphIcon } from 'morphicons/react'
+import { Menu, X, LogIn, LogOut } from 'lucide'
+import { Wrench, Heart, ShoppingBag } from 'lucide-react'
 
-export default function Topbar({ cartCount, onCartOpen, onMenuOpen, user, isAdmin, onLoginOpen, onSignOut, favCount, onFavOpen }) {
+export default function Topbar({ cartCount, onCartOpen, onMenuOpen, isMenuOpen, user, isAdmin, onLoginOpen, onSignOut, favCount, onFavOpen }) {
   return (
-    <header className="bg-black text-white shrink-0 z-50 border-b border-[#76974a]/20">
+    <header className="bg-black text-white shrink-0 z-50 border-b border-[#72a744]/20">
       <div
         className="flex items-center justify-between"
         style={{
@@ -18,13 +21,10 @@ export default function Topbar({ cartCount, onCartOpen, onMenuOpen, user, isAdmi
           <button
             onClick={onMenuOpen}
             className="md:hidden p-2 hover:opacity-75 transition-opacity cursor-pointer"
-            aria-label="Open menu"
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMenuOpen}
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
+            <MorphIcon icon={isMenuOpen ? X : Menu} spring="smooth" size={22} strokeWidth={2.5} />
           </button>
 
           <Link to="/" className="font-display text-xl font-bold tracking-wide hover:opacity-80 transition-opacity">Root & Vine</Link>
@@ -41,12 +41,7 @@ export default function Topbar({ cartCount, onCartOpen, onMenuOpen, user, isAdmi
               aria-label="Admin dashboard"
               title="Admin dashboard"
             >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#678649" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="7" rx="1" />
-                <rect x="3" y="14" width="7" height="7" rx="1" />
-                <rect x="14" y="14" width="7" height="7" rx="1" />
-              </svg>
+              <Wrench size={20} strokeWidth={2} color="#5c8d3f" />
             </Link>
           )}
 
@@ -56,11 +51,9 @@ export default function Topbar({ cartCount, onCartOpen, onMenuOpen, user, isAdmi
             className="relative p-2 hover:opacity-75 transition-opacity cursor-pointer"
             aria-label="Favorites"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill={favCount > 0 ? '#678649' : 'none'} stroke={favCount > 0 ? '#678649' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
+            <Heart size={22} strokeWidth={2} color={favCount > 0 ? '#5c8d3f' : 'currentColor'} fill={favCount > 0 ? '#5c8d3f' : 'none'} />
             {favCount > 0 && (
-              <span className="absolute top-0 right-0 bg-[#76974a] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold leading-none">
+              <span className="absolute top-0 right-0 bg-[#72a744] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold leading-none">
                 {favCount}
               </span>
             )}
@@ -73,10 +66,7 @@ export default function Topbar({ cartCount, onCartOpen, onMenuOpen, user, isAdmi
             aria-label={user ? 'Sign out' : 'Login'}
             title={user ? `Signed in as ${user.email} — click to sign out` : 'Sign in'}
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={user ? '#678649' : 'currentColor'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-            </svg>
+            <MorphIcon icon={user ? LogOut : LogIn} spring="smooth" size={22} strokeWidth={2.5} color={user ? '#5c8d3f' : 'currentColor'} />
           </button>
 
           {/* Cart — all screens */}
@@ -85,13 +75,9 @@ export default function Topbar({ cartCount, onCartOpen, onMenuOpen, user, isAdmi
             className="relative p-2 hover:opacity-75 transition-opacity cursor-pointer"
             aria-label="Open cart"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <path d="M16 10a4 4 0 0 1-8 0" />
-            </svg>
+            <ShoppingBag size={22} strokeWidth={2} />
             {cartCount > 0 && (
-              <span className="absolute top-0 right-0 bg-[#76974a] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold leading-none">
+              <span className="absolute top-0 right-0 bg-[#72a744] text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold leading-none">
                 {cartCount}
               </span>
             )}

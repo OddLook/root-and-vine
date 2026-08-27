@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { MorphIcon } from 'morphicons/react'
+import { ShoppingBag, Check, Heart } from 'lucide'
 
 function CareDetail({ label, value }) {
   return (
@@ -12,6 +14,26 @@ function CareDetail({ label, value }) {
 
 export default function ProductCard({ product, onAddToCart, isMobile, isFav = false, onToggleFavorite }) {
   const [flipped, setFlipped] = useState(false)
+  const [justAdded, setJustAdded] = useState(false)
+  const [justFaved, setJustFaved] = useState(false)
+  const addedTimeout = useRef(null)
+  const favedTimeout = useRef(null)
+
+  function handleAdd(e) {
+    e.stopPropagation()
+    onAddToCart(product)
+    setJustAdded(true)
+    clearTimeout(addedTimeout.current)
+    addedTimeout.current = setTimeout(() => setJustAdded(false), 1200)
+  }
+
+  function handleToggleFav(e) {
+    e.stopPropagation()
+    onToggleFavorite()
+    setJustFaved(true)
+    clearTimeout(favedTimeout.current)
+    favedTimeout.current = setTimeout(() => setJustFaved(false), 1000)
+  }
 
   if (isMobile) {
     return (
@@ -35,15 +57,16 @@ export default function ProductCard({ product, onAddToCart, isMobile, isFav = fa
               className="absolute inset-0 flex flex-col justify-end items-center text-center gap-3"
               style={{ paddingLeft: '2rem', paddingRight: '2rem', paddingBottom: '2.5rem' }}
             >
-              <h2 className="font-display text-white text-3xl font-bold leading-tight">{product.name}</h2>
+              <h2 className="font-sans text-white text-3xl font-bold leading-tight">{product.name}</h2>
               <p className="text-white/80 text-base leading-relaxed">{product.description}</p>
-              <span className="font-display text-white text-2xl font-bold mt-2">${product.price}</span>
+              <span className="font-sans text-white text-2xl font-bold mt-2">${product.price}</span>
               <button
-                onClick={(e) => { e.stopPropagation(); onAddToCart(product) }}
-                className="w-full min-h-[44px] rounded-full bg-[#678649] text-white text-sm font-semibold hover:bg-[#76974a] transition-colors cursor-pointer mt-1"
+                onClick={handleAdd}
+                className="w-full min-h-[44px] rounded-full bg-[#5c8d3f] text-white text-sm font-semibold hover:bg-[#72a744] transition-colors cursor-pointer mt-1 flex items-center justify-center gap-2"
                 style={{ paddingLeft: '1.25rem', paddingRight: '1.25rem', paddingTop: '0.625rem', paddingBottom: '0.625rem' }}
               >
-                Add to Cart
+                <MorphIcon icon={justAdded ? Check : ShoppingBag} spring="smooth" size={16} strokeWidth={2.5} />
+                {justAdded ? 'Added!' : 'Add to Cart'}
               </button>
             </motion.div>
           ) : (
@@ -56,7 +79,7 @@ export default function ProductCard({ product, onAddToCart, isMobile, isFav = fa
               className="absolute inset-0 flex flex-col justify-end items-center text-center gap-5"
               style={{ paddingLeft: '2rem', paddingRight: '2rem', paddingBottom: '2.5rem' }}
             >
-              <h2 className="font-display text-white text-2xl font-bold">{product.name} — Care Guide</h2>
+              <h2 className="font-sans text-white text-2xl font-bold">{product.name} — Care Guide</h2>
               <div className="grid grid-cols-2 gap-4 w-full">
                 <CareDetail label="Light" value={product.light} />
                 <CareDetail label="Water" value={product.water} />
@@ -77,14 +100,19 @@ export default function ProductCard({ product, onAddToCart, isMobile, isFav = fa
       {/* Heart button — top right, visible on hover */}
       {onToggleFavorite && (
         <button
-          onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+          onClick={handleToggleFav}
           aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
           className="absolute top-3 right-3 z-10 w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200 cursor-pointer opacity-0 group-hover:opacity-100"
           style={{ background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(6px)' }}
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill={isFav ? '#e05c6a' : 'none'} stroke={isFav ? '#e05c6a' : 'rgba(255,255,255,0.85)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
+          <MorphIcon
+            icon={justFaved ? Check : Heart}
+            spring="smooth"
+            size={16}
+            strokeWidth={2.5}
+            color={justFaved ? '#e05c6a' : (isFav ? '#e05c6a' : 'rgba(255,255,255,0.85)')}
+            fill={!justFaved && isFav ? '#e05c6a' : 'none'}
+          />
         </button>
       )}
       <img
@@ -106,16 +134,17 @@ export default function ProductCard({ product, onAddToCart, isMobile, isFav = fa
             className="absolute inset-0 flex flex-col justify-end items-center text-center p-8 gap-2"
             style={{ paddingBottom: '3rem' }}
           >
-            <h3 className="font-display text-white text-xl font-bold leading-tight">{product.name}</h3>
+            <h3 className="font-sans text-white text-xl font-bold leading-tight">{product.name}</h3>
             <p className="text-white/75 text-sm leading-relaxed line-clamp-2">{product.description}</p>
-            <span className="font-display text-white font-bold text-2xl mt-1">${product.price}</span>
+            <span className="font-sans text-white font-bold text-2xl mt-1">${product.price}</span>
             <div style={{ display: 'flex', justifyContent: 'center', width: '100%', marginTop: '0.5rem' }}>
               <button
-                onClick={(e) => { e.stopPropagation(); onAddToCart(product); }}
-                className="min-h-[44px] rounded-full bg-[#678649] text-white text-sm font-semibold hover:bg-[#76974a] transition-colors cursor-pointer"
+                onClick={handleAdd}
+                className="min-h-[44px] rounded-full bg-[#5c8d3f] text-white text-sm font-semibold hover:bg-[#72a744] transition-colors cursor-pointer flex items-center justify-center gap-2"
                 style={{ paddingLeft: '2rem', paddingRight: '2rem', paddingTop: '0.5rem', paddingBottom: '0.5rem' }}
               >
-                Add to Cart
+                <MorphIcon icon={justAdded ? Check : ShoppingBag} spring="smooth" size={16} strokeWidth={2.5} />
+                {justAdded ? 'Added!' : 'Add to Cart'}
               </button>
             </div>
           </motion.div>
@@ -129,7 +158,7 @@ export default function ProductCard({ product, onAddToCart, isMobile, isFav = fa
             className="absolute inset-0 flex flex-col justify-end items-center text-center p-8 gap-4 bg-black/65"
             style={{ paddingBottom: '3rem' }}
           >
-            <h3 className="font-display text-white font-bold text-lg">Care Guide</h3>
+            <h3 className="font-sans text-white font-bold text-lg">Care Guide</h3>
             <div className="grid grid-cols-2 gap-3 w-full">
               <CareDetail label="Light" value={product.light} />
               <CareDetail label="Water" value={product.water} />

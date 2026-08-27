@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { Check } from 'lucide-react'
 
 export default function CheckoutSuccess({ onClearCart }) {
   useEffect(() => {
@@ -14,10 +15,8 @@ export default function CheckoutSuccess({ onClearCart }) {
           Root &amp; Vine
         </p>
 
-        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(103,134,73,0.15)', border: '1.5px solid #678649', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#678649" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
+        <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(92,141,63,0.15)', border: '1.5px solid #5c8d3f', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+          <Check size={28} strokeWidth={2.5} color="#5c8d3f" />
         </div>
 
         <p style={{ fontWeight: 700, fontSize: '1.25rem', color: '#fff', marginBottom: '0.5rem' }}>
@@ -29,7 +28,7 @@ export default function CheckoutSuccess({ onClearCart }) {
 
         <Link
           to="/"
-          style={{ display: 'inline-block', padding: '0.875rem 2.5rem', background: '#678649', color: '#fff', borderRadius: '999px', fontSize: '0.95rem', fontWeight: 600, textDecoration: 'none' }}
+          style={{ display: 'inline-block', padding: '0.875rem 2.5rem', background: '#5c8d3f', color: '#fff', borderRadius: '999px', fontSize: '0.95rem', fontWeight: 600, textDecoration: 'none' }}
         >
           Back to shop
         </Link>

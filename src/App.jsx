@@ -25,6 +25,7 @@ function MainLayout({ user, isAdmin, onCartOpen, onMenuOpen, onLoginOpen, onSign
         cartCount={cart.length}
         onCartOpen={onCartOpen}
         onMenuOpen={onMenuOpen}
+        isMenuOpen={isMenuOpen}
         user={user}
         isAdmin={isAdmin}
         onLoginOpen={onLoginOpen}
@@ -98,7 +99,7 @@ export default function App() {
       <Route path="/" element={
         <MainLayout
           user={user} isAdmin={isAdmin}
-          onCartOpen={openCart} onMenuOpen={() => setIsMenuOpen(true)}
+          onCartOpen={openCart} onMenuOpen={() => setIsMenuOpen(o => !o)}
           onLoginOpen={openAuth} onSignOut={signOut}
           cart={cart} addToCart={addToCart} removeFromCart={removeFromCart}
           isCartOpen={isCartOpen} closeCart={closeCart}

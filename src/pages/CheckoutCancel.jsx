@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { X } from 'lucide-react'
 
 export default function CheckoutCancel() {
   return (
@@ -10,9 +11,7 @@ export default function CheckoutCancel() {
         </p>
 
         <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: '1.5px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
-          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
+          <X size={26} strokeWidth={2.5} color="rgba(255,255,255,0.4)" />
         </div>
 
         <p style={{ fontWeight: 700, fontSize: '1.15rem', color: '#fff', marginBottom: '0.5rem' }}>
@@ -24,7 +23,7 @@ export default function CheckoutCancel() {
 
         <Link
           to="/"
-          style={{ display: 'inline-block', padding: '0.875rem 2.5rem', background: '#678649', color: '#fff', borderRadius: '999px', fontSize: '0.95rem', fontWeight: 600, textDecoration: 'none' }}
+          style={{ display: 'inline-block', padding: '0.875rem 2.5rem', background: '#5c8d3f', color: '#fff', borderRadius: '999px', fontSize: '0.95rem', fontWeight: 600, textDecoration: 'none' }}
         >
           Back to shop
         </Link>
