@@ -26,8 +26,6 @@ export default function Hero({ onSignUpOpen }) {
 
       {/* Directional gradient — just enough for text legibility over the left third */}
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/35 to-transparent" />
-      {/* Bottom fade into next section */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black/40 to-transparent" />
 
       {/* Content */}
       <div className="relative z-10 w-full py-28 md:py-36" style={{ paddingLeft: 'clamp(1.25rem, 5vw, 5rem)', paddingRight: 'clamp(1.25rem, 5vw, 5rem)' }}>
@@ -78,7 +76,7 @@ export default function Hero({ onSignUpOpen }) {
       {/* Organic wave transition to shop section */}
       <div className="absolute bottom-0 left-0 right-0 z-20">
         <svg viewBox="0 0 1440 72" preserveAspectRatio="none" className="w-full block">
-          <path d="M0,36 C320,72 640,0 960,36 C1120,54 1280,18 1440,36 L1440,72 L0,72 Z" fill="#f5f2ed" />
+          <path d="M0,72 C280,72 360,38 720,38 C1080,38 1160,72 1440,72 L1440,72 L0,72 Z" fill="#f5f2ed" />
         </svg>
       </div>
     </section>
